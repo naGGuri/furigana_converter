@@ -50,16 +50,21 @@ const Result = () => {
                     </div>
                 ) : (
                     <div className="w-[324px] h-[480px] rounded-md overflow-y-auto">
-                        <div className="flex flex-col items-start justify-start p-4 bg-[rgba(180,219,255,0.3)] rounded-md">
+                        <div className="flex flex-col p-4 bg-[rgba(180,219,255,0.3)] rounded-md">
                             {result.vocabulary.map((sentence, idx) => (
-                                <div key={idx} className="mb-4 bg-white p-4 rounded shadow">
+                                <div key={idx} className="w-full bg-white p-4 rounded shadow">
                                     {sentence.map((item, widx) => (
                                         <div
                                             key={widx}
-                                            className="flex justify-between py-1 text-sm text-dark2 border-b"
+                                            className="flex justify-between py-4 text-sm text-dark2 border-b"
                                         >
-                                            <span>{item.word}</span>
-                                            <span className="text-gray-500">{item.reading}</span>
+                                            <span className="text-dark1 text-[32px] font-bold text-start">
+                                                {item.word}
+                                            </span>
+                                            <span className="text-dark2 font-semibold text-[12px] text-start">
+                                                {item.reading}
+                                            </span>
+                                            <span className="text-right text-xs text-dark4">{item.translation}</span>
                                         </div>
                                     ))}
                                 </div>
