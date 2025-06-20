@@ -1,7 +1,7 @@
 import React from "react";
 
 interface MobileLayoutProps {
-    title: string; // 헤더 제목은 필수
+    title?: string; // 헤더 제목은 필수
     onBack?: () => void; // 뒤로가기 버튼 클릭 핸들러 (선택)
     onClose?: () => void; // 닫기 버튼 클릭 핸들러 (선택)
     children: React.ReactNode;

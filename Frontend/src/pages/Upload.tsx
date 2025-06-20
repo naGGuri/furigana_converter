@@ -76,10 +76,8 @@ const Upload = () => {
     };
 
     return (
-        <MobileLayout>
+        <MobileLayout title="Upload File" onBack={() => navigate(-1)} onClose={goToHome}>
             <div className="flex flex-col justify-between items-center">
-                <p className="font-bold text-[20px] mb-[34px]">Upload File</p>
-
                 {/* 업로드 영역 (드래그앤드롭 또는 클릭 업로드) */}
                 <div
                     className={`rounded w-[280px] h-[220px] flex flex-col justify-center items-center gap-[15px]
@@ -126,19 +124,16 @@ const Upload = () => {
 
                 {/* 업로드된 파일 목록 */}
                 <p className="font-[16px] my-[20px]">Uploaded Files</p>
-                <div className="w-[280px] h-[230px] overflow-y-auto">
+                <div className="w-[280px] h-[230px] mb-[20px] overflow-y-auto">
                     {files.map((file, index) => (
                         <UploadedFile key={index} file={file} onDelete={() => removeFile(index)} />
                     ))}
                 </div>
 
-                {/* 취소/다음 버튼 */}
-                <div className="w-[280px] mt-[28px] flex justify-between items-center">
-                    <Button size="medium" variant="secondary" onClick={goToHome}>
-                        Cancel
-                    </Button>
-                    <Button size="medium" variant="primary" onClick={goToConvert}>
-                        Next
+                {/* 버튼 */}
+                <div className="flex w-full justify-center items-center">
+                    <Button size="large" variant="primary" onClick={goToConvert}>
+                        Convert
                     </Button>
                 </div>
             </div>

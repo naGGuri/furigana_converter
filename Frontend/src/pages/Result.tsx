@@ -11,10 +11,15 @@ const Result = () => {
     const { result } = useOCRStore();
     const [toggle, setToggle] = useState<"Furigana" | "Vocabulary">("Furigana"); // Furigana 또는 Vocabulary 선택 토글 상태
     const navigate = useNavigate();
-    console.log("🧪 OCR result in Result.tsx: ", result);
+
+    const goToHome = () => {
+        navigate("/");
+    };
+
+    // console.log("🧪 OCR result in Result.tsx: ", result);
 
     return (
-        <MobileLayout title="Result" onClose={() => navigate("/upload")}>
+        <MobileLayout title="Result" onClose={goToHome}>
             <div className="px-4 py-6">
                 {/* 토글 버튼 */}
                 <div className="flex w-[330px] h-[40px] p-[4px] mb-8 bg-light4 rounded-xl justify-center items-center gap-[2px]">
