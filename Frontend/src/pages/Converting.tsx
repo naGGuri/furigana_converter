@@ -35,7 +35,7 @@ const Converting = () => {
 
         const controller = new AbortController();
         controllerRef.current = controller;
-
+        console.log(BASE_URL, endpoint);
         axios
             .post(`${BASE_URL}/api/ocr/${endpoint}`, formData, {
                 signal: controller.signal,
