@@ -4,6 +4,7 @@ import { create } from "zustand";
 export interface VocabularyWord {
     word: string;
     reading: string;
+    translation: string;
 }
 
 export interface OCRResult {
