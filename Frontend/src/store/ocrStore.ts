@@ -10,6 +10,7 @@ export interface VocabularyWord {
 export interface OCRResult {
     furigana: string[];
     vocabulary: VocabularyWord[][];
+    fileNames: string[];
 }
 
 interface OCRState {
@@ -18,6 +19,6 @@ interface OCRState {
 }
 
 export const useOCRStore = create<OCRState>((set) => ({
-    result: { furigana: [], vocabulary: [] },
+    result: { furigana: [], vocabulary: [], fileNames: [] },
     setResult: (result) => set({ result }),
 }));

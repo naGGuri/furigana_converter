@@ -48,6 +48,7 @@ const Converting = () => {
                 setResult({
                     furigana: furiganaData.furigana_texts || [],
                     vocabulary: vocabData.kanji_words_list || [],
+                    fileNames: [],
                 });
 
                 navigate("/result");
