@@ -39,7 +39,7 @@ const Result = () => {
                 doc.text(`📄 ${result.fileNames?.[idx] ?? `uploaded file ${idx + 1}`}`, 10, cursorY);
                 cursorY += 10;
                 sentence.forEach((item) => {
-                    const line = `${item.word} (${item.reading}) - ${item.translation}`;
+                    const line = `${item.word} (${item.reading}) - ${item.translation.toLowerCase()}`;
                     const lines = doc.splitTextToSize(line, maxWidth);
                     doc.text(lines, 10, cursorY);
                     cursorY += lines.length * 8;
@@ -47,12 +47,17 @@ const Result = () => {
                 cursorY += 6;
             });
         }
-
+        console.log("PDF 저장!");
         doc.save("ocr_result.pdf");
     };
 
     // ✅ 클립보드 복사
     const handleCopyToClipboard = () => {
+        if (!navigator.clipboard) {
+            alert("❌ 현재 브라우저에서 클립보드 복사가 지원되지 않습니다.");
+            return;
+        }
+
         let text = "";
         if (toggle === "Furigana") {
             text = result.furigana
@@ -69,8 +74,14 @@ const Result = () => {
                 })
                 .join("\n\n");
         }
-        navigator.clipboard.writeText(text);
-        alert("클립보드에 복사되었습니다!");
+
+        navigator.clipboard
+            .writeText(text)
+            .then(() => console.log("클립보드에 복사되었습니다!"))
+            .catch((err) => {
+                console.error("❌ 클립보드 복사 실패:", err);
+                alert("❌ 클립보드 복사 중 오류가 발생했습니다.");
+            });
     };
 
     return (
