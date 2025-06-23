@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUploadStore } from "../store/uploadStore";
 import { useOCRStore } from "../store/ocrStore";
-import MobileLayout from "../components/MobileLayout";
 import axios from "axios";
 import Button from "../components/Button";
 import CustomDialog from "../components/CustomDialog";
@@ -71,31 +70,34 @@ const Converting = () => {
     }, [files, navigate, setResult]);
 
     return (
-        <MobileLayout>
-            <div className="flex flex-col justify-center items-center h-full">
-                <p className="font-bold text-[24px]">Converting now</p>
-                <p className="font-normal text-[16px] text-dark5">please wait...</p>
-                <img
-                    src="/src/assets/loading_spinner.svg"
-                    alt="로딩 중"
-                    className="w-[48px] h-[48px] animate-spin mt-[20px] mb-[30px]"
+        <div className="w-full flex justify-center items-center font-Pretendard font-normal text-dark1">
+            <div className="w-full max-w-sm h-[768px] flex flex-col border border-light1">
+                {" "}
+                <div className="flex flex-col justify-center items-center h-full">
+                    <p className="font-bold text-[24px]">Converting now</p>
+                    <p className="font-normal text-[16px] text-dark5">please wait...</p>
+                    <img
+                        src="/src/assets/loading_spinner.svg"
+                        alt="로딩 중"
+                        className="w-[48px] h-[48px] animate-spin mt-[20px] mb-[30px]"
+                    />
+                    <Button size="large" variant="secondary" onClick={() => setOpen(true)}>
+                        Stop
+                    </Button>
+                </div>
+                <CustomDialog
+                    title="Are you sure?"
+                    subtitle="This operation is irreversible"
+                    isOpen={open}
+                    onCancel={() => setOpen(false)}
+                    onConfirm={() => {
+                        controllerRef.current?.abort();
+                        setOpen(false);
+                        navigate("/upload");
+                    }}
                 />
-                <Button size="large" variant="secondary" onClick={() => setOpen(true)}>
-                    Stop
-                </Button>
             </div>
-            <CustomDialog
-                title="Are you sure?"
-                subtitle="This operation is irreversible"
-                isOpen={open}
-                onCancel={() => setOpen(false)}
-                onConfirm={() => {
-                    controllerRef.current?.abort();
-                    setOpen(false);
-                    navigate("/upload");
-                }}
-            />
-        </MobileLayout>
+        </div>
     );
 };
 
