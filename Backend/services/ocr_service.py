@@ -93,24 +93,32 @@ def make_furigana(image_bytes: bytes) -> str:
     - 문장 단위로 줄바꿈 처리 포함
     - 예: 日本語 → 日本語(にほんご)
     """
+    #  OCR 인식
     text = extract_japanese_from_image(image_bytes)
+    #  정규화
+    text = text.replace(";", "、").replace(",", "、").replace(".", "。")
+    #  특수문자 제거
+    text = re.sub(r"[^\u3040-\u30FF\u4E00-\u9FAF。、0-9a-zA-Z\s]", "", text)
+    #  문장 단위 분할
+    sentences = re.split(r'(?<=[。！？])', text)
+
     result = []
-
-    # 문장 단위로 자르기 (문장 구두점 기준)
-    sentences = re.split(r'(?<=[。！？\n])', text)
-
     for sentence in sentences:
-        sentence_result = []
+        if sentence.strip() == "":
+            continue
 
+        sentence_result = []
         for word in tagger(sentence):
             surface = word.surface
-            if contains_kanji(surface):
+            if surface.strip() == "":
+                continue
+            if re.search(r'[\u4e00-\u9faf]', surface):
                 reading = conv.do(surface)
                 sentence_result.append(f"{surface}({reading})")
             else:
                 sentence_result.append(surface)
 
-        # 문장별 후리가나 결과를 줄 단위로 추가
-        result.append(''.join(sentence_result))
+        result.append(''.join(sentence_result).strip())
 
-    return '\n'.join(result)  # 각 문장을 줄바꿈 처리하여 반환
+    # 문장 단위 줄바꿈 반환
+    return '\n'.join(result)
