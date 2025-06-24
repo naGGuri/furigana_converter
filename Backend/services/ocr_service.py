@@ -3,6 +3,7 @@ from fugashi import Tagger           # 일본어 형태소 분석기
 from pykakasi import kakasi          # 한자 → 히라가나 변환기
 from PIL import Image                # 이미지 처리용
 import numpy as np
+import torch
 import re
 from io import BytesIO
 from typing import Dict, List
@@ -11,7 +12,10 @@ from googletrans import Translator   # 영어 번역기
 from schemas import OCRWord                    # 📌 공통 응답 스키마
 
 # ✅ OCR 및 텍스트 변환기 초기화
-reader = Reader(['ja'], gpu=False)  # 일본어 OCR, CPU 사용
+USE_GPU = torch.cuda.is_available()
+print(f"✅ GPU 사용 여부: {USE_GPU}")
+
+reader = Reader(['ja'], gpu=USE_GPU)  # 일본어 OCR,
 tagger = Tagger()                   # 형태소 분석기
 translator = Translator()           # 구글 번역기
 
