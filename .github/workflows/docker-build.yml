@@ -21,7 +21,7 @@ jobs:
 
       - name: 🐳 Build Docker image
         run: |
-          docker build -f ./Backend/Dockerfile -t ${{ secrets.DOCKER_USERNAME }}/hurigana-backend:latest .
+          docker build -f ./Backend/Dockerfile -t ${{ secrets.DOCKER_USERNAME }}/hurigana-backend:latest ./Backend
 
       - name: 📤 Push Docker image
         run: |
