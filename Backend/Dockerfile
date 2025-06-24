@@ -1,16 +1,13 @@
-FROM python:3.11-slim
+FROM python:3.11
 
-# 필수 시스템 패키지 설치 (OCR, MeCab, 이미지 처리)
 RUN apt-get update && apt-get install -y \
-    build-essential \
+    mecab \
+    libmecab-dev \
     libgl1-mesa-glx \
     libglib2.0-0 \
     libsm6 \
     libxext6 \
     libxrender-dev \
-    curl \
-    mecab \
-    libmecab-dev \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app

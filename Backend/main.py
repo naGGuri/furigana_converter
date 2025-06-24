@@ -2,6 +2,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from api import ocr  # OCR 관련 API 라우터 import
+from prometheus_fastapi_instrumentator import Instrumentator  # 프로메테우스 메트릭 수집기
 
 # FastAPI 인스턴스 생성
 app = FastAPI()
@@ -19,3 +20,6 @@ app.add_middleware(
 # ✅ OCR 라우터 등록
 # /api/ocr 경로 이하의 요청들을 ocr.py 라우터로 위임
 app.include_router(ocr.router)
+
+# ✅ Prometheus 메트릭 등록
+Instrumentator().instrument(app).expose(app)
