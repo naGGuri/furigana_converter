@@ -107,7 +107,7 @@ const Result = () => {
 
                 {/* 내보내기 버튼 */}
                 <div className="flex justify-end mb-2 cursor-pointer" onClick={() => setOpenExport(true)}>
-                    <img src="src/assets/export.svg" alt="내보내기" className="h-[24px] w-[24px]" />
+                    <img src="public/assets/export.svg" alt="내보내기" className="h-[24px] w-[24px]" />
                 </div>
 
                 {/* 내보내기 다이얼로그 */}

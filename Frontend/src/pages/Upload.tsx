@@ -92,7 +92,7 @@ const Upload = () => {
                     onDragLeave={handleDragLeave}
                 >
                     {/* 업로드 아이콘 */}
-                    <img src="src/assets/image.svg" alt="logo" className="w-[32px] h-[32px]" />
+                    <img src="public/assets/image.svg" alt="logo" className="w-[32px] h-[32px]" />
 
                     {/* 텍스트 및 클릭 업로드 */}
                     <div className="flex flex-col justify-center item-center">
