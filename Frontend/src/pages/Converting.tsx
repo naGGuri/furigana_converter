@@ -13,6 +13,7 @@ const Converting = () => {
     const { setResult } = useOCRStore();
 
     const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+    // console.log("Base URL : ", BASE_URL);
     const controllerRef = useRef<AbortController | null>(null);
 
     useEffect(() => {
