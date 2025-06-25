@@ -16,7 +16,7 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({ title, onBack, onClose, chi
                 <div className="h-12 px-4 flex items-center justify-between">
                     {onBack ? (
                         <img
-                            src="src/assets/arrow_left.svg"
+                            src="public/assets/arrow_left.svg"
                             alt="뒤로가기"
                             className="w-[24px] h-[24px]"
                             onClick={onBack}
@@ -29,7 +29,7 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({ title, onBack, onClose, chi
 
                     {onClose ? (
                         <img
-                            src="src/assets/close_blue.svg"
+                            src="public/assets/close_blue.svg"
                             alt="닫기"
                             className="w-[24px] h-[24px]"
                             onClick={onClose}
