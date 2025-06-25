@@ -29,6 +29,6 @@ jobs:
 
             - name: 🚀 Trigger Webhook (Deploy to Server)
               run: |
-                  curl -X POST http://${{ secrets.SERVER_IP }}:9000/webhook \
+                  curl -X POST http://${{ secrets.SERVER_IP }}:9001/webhook \
                     -H "Content-Type: application/json" \
                     -d '{"trigger": "docker-build-done"}'
