@@ -58,9 +58,9 @@ const Convert = () => {
                 <div className="flex justify-center items-center h-[130px] relative p-4">
                     <div className="absolute inset-0 bg-primary4 opacity-30" />
                     {toggle === "Furigana" ? (
-                        <img src="public/assets/furigana_preview.svg" alt="후리가나 예시" className="relative" />
+                        <img src="assets/furigana_preview.svg" alt="후리가나 예시" className="relative" />
                     ) : (
-                        <img src="public/assets/voca_preview.svg" alt="단어장 예시" className="relative" />
+                        <img src="assets/voca_preview.svg" alt="단어장 예시" className="relative" />
                     )}
                 </div>
                 <p className="font-light text-light1 text-[12px] mt-[2px]">Output Sample</p>
