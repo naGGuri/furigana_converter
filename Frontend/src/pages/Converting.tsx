@@ -78,7 +78,7 @@ const Converting = () => {
                     <p className="font-bold text-[24px]">Converting now</p>
                     <p className="font-normal text-[16px] text-dark5">please wait...</p>
                     <img
-                        src="public/assets/loading_spinner.svg"
+                        src="assets/loading_spinner.svg"
                         alt="로딩 중"
                         className="w-[48px] h-[48px] animate-spin mt-[20px] mb-[30px]"
                     />

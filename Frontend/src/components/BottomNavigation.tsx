@@ -1,8 +1,8 @@
 const navItems = [
-    { label: "Explore", icon: "../public/assets/explore.svg", active: true },
-    { label: "Categories", icon: "../public/assets/categories.svg", active: false },
-    { label: "Stores", icon: "../public/assets/stores.svg", active: false },
-    { label: "Profile", icon: "../public/assets/profile.svg", active: false },
+    { label: "Explore", icon: "../assets/explore.svg", active: true },
+    { label: "Categories", icon: "../assets/categories.svg", active: false },
+    { label: "Stores", icon: "../assets/stores.svg", active: false },
+    { label: "Profile", icon: "../assets/profile.svg", active: false },
 ];
 
 const BottomNavigation = () => {
