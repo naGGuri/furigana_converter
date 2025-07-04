@@ -5,7 +5,7 @@ import MobileLayout from "../components/MobileLayout";
 const ChatbotPage = () => {
     const navigate = useNavigate();
     return (
-        <MobileLayout title="Chatbot" onClose={() => navigate("/")}>
+        <MobileLayout title="Chatbot" onBack={() => navigate(-1)}>
             <Chatbot />
         </MobileLayout>
     );
