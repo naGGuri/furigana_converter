@@ -58,3 +58,7 @@ app.include_router(auth.router) # auth 라우터 포함
 # 애플리케이션의 성능 메트릭을 Prometheus 형식으로 노출하도록 설정합니다.
 # /metrics 엔드포인트를 통해 메트릭을 확인할 수 있습니다.
 Instrumentator().instrument(app).expose(app)
+
+@app.get("/health")
+async def health_check():
+    return {"status": "ok"}

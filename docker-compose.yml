@@ -1,13 +1,26 @@
+version: "3.8"
+
 services:
-    app:
+    frontend:
         build:
-            context: .
+            context: ./Frontend
             dockerfile: Dockerfile
-        container_name: fastapi-app
+        container_name: hurigana-frontend
+        ports:
+            - "80:80" # 호스트의 80번 포트를 컨테이너의 80번 포트에 매핑
+        depends_on:
+          backend:
+            condition: service_healthy
+
+    backend:
+        build:
+            context: ./Backend
+            dockerfile: Dockerfile
+        container_name: hurigana-backend
         ports:
             - "8000:8000"
         volumes:
-            - .:/app
+            - ./Backend:/app
         command: bash -c "pip install -r requirements.txt && uvicorn main:app --host 0.0.0.0 --port 8000"
         depends_on:
             - db
@@ -15,6 +28,12 @@ services:
             DATABASE_URL: postgresql://user:password@db:5432/huriganadb
             GEMINI_API_KEY: ${GEMINI_API_KEY}
             SECRET_KEY: ${SECRET_KEY}
+        healthcheck:
+            test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+            interval: 30s
+            timeout: 10s
+            retries: 5
+            start_period: 20s
 
     db:
         image: postgres:13-alpine
