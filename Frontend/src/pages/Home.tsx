@@ -8,6 +8,10 @@ const Home = () => {
         navigate("/upload");
     };
 
+    const goToChatbot = () => {
+        navigate("/chatbot");
+    };
+
     return (
         <div className="w-full flex justify-center items-center font-Pretendard">
             <div className="w-full max-w-sm h-[768px] px-4 py-6 bg-[url(/home_background.png)] flex flex-col items-center justify-center gap-3">
@@ -19,6 +23,9 @@ const Home = () => {
                 </p>
                 <Button size="small" variant="primary" onClick={goToUpload}>
                     Let's Start
+                </Button>
+                <Button size="small" variant="secondary" onClick={goToChatbot}>
+                    Chat with AI Tutor
                 </Button>
             </div>
         </div>
