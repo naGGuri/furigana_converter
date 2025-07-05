@@ -7,6 +7,8 @@ import Converting from "./pages/Converting";
 import Result from "./pages/Result";
 import Home from "./pages/Home";
 import ChatbotPage from "./pages/ChatbotPage"; // 챗봇 페이지 import
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 
 const App = () => {
     return (
@@ -18,6 +20,8 @@ const App = () => {
                 <Route path="/converting" element={<Converting />} />
                 <Route path="/result" element={<Result />} />
                 <Route path="/chatbot" element={<ChatbotPage />} /> {/* 챗봇 페이지 라우트 추가 */}
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
                 <Route path="*" element={<div>404 - Page Not Found</div>} />
             </Routes>
         </Router>

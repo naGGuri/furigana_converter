@@ -15,7 +15,7 @@ router = APIRouter()
 
 # OAuth2PasswordBearer를 사용하여 토큰을 가져옵니다.
 # tokenUrl은 클라이언트가 토큰을 얻을 수 있는 URL을 지정합니다.
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
 
 async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
@@ -37,7 +37,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
     return user
 
 
-@router.post("/api/auth/signup", response_model=User)
+@router.post("/auth/signup", response_model=User)
 def signup(user: UserCreate, db: Session = Depends(get_db)):
     """
     새로운 사용자를 등록하는 API 엔드포인트.
@@ -53,7 +53,7 @@ def signup(user: UserCreate, db: Session = Depends(get_db)):
     return auth_service.signup_user(db=db, user=user)
 
 
-@router.post("/api/auth/login", response_model=Token)
+@router.post("/auth/login", response_model=Token)
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     """
     사용자 로그인을 처리하고 JWT 액세스 토큰을 발급하는 API 엔드포인트.
@@ -69,7 +69,7 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
     return auth_service.login_user(db=db, form_data=form_data)
 
 
-@router.get("/api/users/me", response_model=User)
+@router.get("/users/me", response_model=User)
 async def read_users_me(current_user: User = Depends(get_current_user)):
     """
     현재 로그인한 사용자 정보를 조회하는 API 엔드포인트.
