@@ -1,19 +1,13 @@
+// frontend/vite.config.ts
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { qrcode } from "vite-plugin-qrcode";
 
-// https://vite.dev/config/
 export default defineConfig({
-    base: process.env.VITE_BASE_URL,
-    plugins: [react(), qrcode()],
-    server: {
-        host: true,
-        proxy: {
-            '/api': {
-                target: 'http://127.0.0.1:8000',
-                changeOrigin: true,
-                rewrite: (path) => path.replace(/^\/api/, ''),
-            },
-        },
+    base: "/",
+    define: {
+        // 환경변수를 직접 define
+        "import.meta.env.VITE_API_BASE_URL": JSON.stringify(process.env.VITE_API_BASE_URL),
     },
+    plugins: [react(), qrcode()],
 });

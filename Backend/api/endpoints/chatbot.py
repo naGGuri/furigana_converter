@@ -5,19 +5,15 @@ from fastapi.responses import StreamingResponse
 
 # 챗봇 비즈니스 로직을 담당하는 서비스 모듈을 임포트합니다.
 from services import chatbot_service
-from schemas.chatbot import ChatRequest # schemas.chatbot에서 ChatRequest 임포트
+from schemas.chatbot import ChatRequest  # schemas.chatbot에서 ChatRequest 임포트
 
-# ✅ FastAPI 라우터 생성
-# 이 라우터는 챗봇 관련 API 엔드포인트를 정의하고 관리합니다.
-# prefix="/api/chatbot"는 이 라우터에 정의된 모든 경로 앞에 "/api/chatbot"을 추가합니다.
-# tags=["chatbot"]는 OpenAPI 문서에서 이 엔드포인트들을 "chatbot" 태그 아래에 그룹화합니다.
-router = APIRouter(prefix="/api/chatbot", tags=["chatbot"])
+router = APIRouter()
 
 
-@router.post("/stream")
+@router.post("/chatbot/stream")
 async def chat_stream(req: ChatRequest):
     """
-    Gemini Pro 모델과 스트리밍 방식으로 대화하는 API 엔드포인트.
+    Gemini 모델과 스트리밍 방식으로 대화하는 API 엔드포인트.
     클라이언트로부터 메시지를 받아 챗봇 서비스로 전달하고, 모델의 응답을 스트리밍 방식으로 반환합니다.
 
     Args:

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUploadStore } from "../store/uploadStore";
 import { useOCRStore } from "../store/ocrStore";
+import api from "../api/config";
 import axios from "axios";
 import Button from "../components/Button";
 import CustomDialog from "../components/CustomDialog";
@@ -12,7 +13,7 @@ const Converting = () => {
     const { files } = useUploadStore();
     const { setResult } = useOCRStore();
 
-    const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+    // const BASE_URL = import.meta.env.VITE_API_BASE_URL; // BASE_URL 제거
     // console.log("Base URL : ", BASE_URL);
     const controllerRef = useRef<AbortController | null>(null);
 
@@ -34,10 +35,10 @@ const Converting = () => {
         const sendRequests = async () => {
             try {
                 const [furiganaRes, vocabularyRes] = await Promise.all([
-                    axios.post(`${BASE_URL}/api/ocr/furigana`, formData, {
+                    api.post(`/ocr/furigana`, formData, {
                         signal: controller.signal,
                     }),
-                    axios.post(`${BASE_URL}/api/ocr/voca`, formData, {
+                    api.post(`/ocr/voca`, formData, {
                         signal: controller.signal,
                     }),
                 ]);
