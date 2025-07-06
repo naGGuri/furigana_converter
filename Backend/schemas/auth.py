@@ -9,6 +9,7 @@ class User(BaseModel):
     데이터베이스에서 조회된 사용자 정보를 클라이언트에 반환할 때 사용됩니다.
     """
     id: int
+    name: str
     email: str
 
     class Config:
@@ -24,6 +25,7 @@ class UserCreate(BaseModel):
     새로운 사용자 생성을 위한 Pydantic 모델 (요청용).
     클라이언트로부터 회원가입 요청을 받을 때 사용됩니다.
     """
+    name: str
     email: str
     password: str
 

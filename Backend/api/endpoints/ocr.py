@@ -7,17 +7,18 @@ from fastapi import APIRouter, UploadFile, File
 from services import ocr_service
 
 # 응답 데이터 모델을 임포트합니다.
-from schemas.ocr import TranslatedVocabularyResult, FuriganaResult # schemas.ocr에서 스키마 임포트
+# schemas.ocr에서 스키마 임포트
+from schemas.ocr import TranslatedVocabularyResult, FuriganaResult
 
 # ✅ FastAPI 라우터 생성
 # 이 라우터는 OCR 관련 API 엔드포인트를 정의하고 관리합니다.
 router = APIRouter()
 
 
-@router.post("/api/ocr/voca", response_model=TranslatedVocabularyResult)
+@router.post("/ocr/voca", response_model=TranslatedVocabularyResult)
 async def extract_vocabulary(images: List[UploadFile] = File(...)):
     """
-    📌 한자 단어 추출 + 중복 제거 + 영어 번역 API
+    한자 단어 추출 + 중복 제거 + 영어 번역 API
 
     여러 이미지 파일로부터 한자 단어를 추출하고, 중복을 제거한 후,
     각 단어에 대한 후리가나와 영어 번역을 추가하여 반환합니다.
@@ -43,10 +44,10 @@ async def extract_vocabulary(images: List[UploadFile] = File(...)):
     return {"kanji_words_list": results}
 
 
-@router.post("/api/ocr/furigana", response_model=FuriganaResult)
+@router.post("/ocr/furigana", response_model=FuriganaResult)
 async def get_furigana_text(images: List[UploadFile] = File(...)):
     """
-    📌 후리가나 문장 생성 API
+    후리가나 문장 생성 API
 
     업로드된 각 이미지에 포함된 텍스트에 대해 후리가나를 삽입한 문장을 생성하여 반환합니다.
     예: "日本語" → "日本語(にほんご)"

@@ -9,7 +9,7 @@ load_dotenv()
 # JWT 토큰 서명에 사용될 비밀 키
 # 환경 변수에서 SECRET_KEY를 가져오거나 기본값을 사용합니다.
 # TODO: 실제 배포 시 강력한 키로 변경
-SECRET_KEY = os.getenv("SECRET_KEY", "your-super-secret-key")
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 # JWT 토큰 서명에 사용될 알고리즘
 ALGORITHM = "HS256"

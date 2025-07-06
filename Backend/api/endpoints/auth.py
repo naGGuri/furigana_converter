@@ -3,19 +3,17 @@ from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from jose import JWTError
 
-from database.database import get_db # get_db 임포트 추가
-from schemas.auth import User, UserCreate, Token # schemas.auth에서 스키마 임포트
+from database.database import get_db  # get_db 임포트 추가
+from schemas.auth import User, UserCreate, Token  # schemas.auth에서 스키마 임포트
 from services import auth_service
 from crud import user as crud_user
 from utils import auth_utils
 
-# ✅ FastAPI 라우터 생성
-# 이 라우터는 인증 관련 API 엔드포인트를 정의하고 관리합니다.
 router = APIRouter()
 
 # OAuth2PasswordBearer를 사용하여 토큰을 가져옵니다.
 # tokenUrl은 클라이언트가 토큰을 얻을 수 있는 URL을 지정합니다.
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 
 async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):

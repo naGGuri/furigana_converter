@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import axios from "axios";
+import api from "../api/config";
 
 interface Message {
     text: string;
@@ -29,6 +29,8 @@ const Chatbot = () => {
     }, [messages, isLoading]);
 
     const sendMessage = async () => {
+        console.log("✅ axios baseURL:", import.meta.env.VITE_API_BASE_URL);
+
         if (input.trim() === "") return;
         const userMessage: Message = { text: input, isUser: true };
         setMessages((prev) => [...prev, userMessage]);
@@ -36,11 +38,7 @@ const Chatbot = () => {
         setIsLoading(true);
 
         try {
-            const response = await axios.post(
-                "http://localhost:8000/api/chatbot/stream",
-                { message: input },
-                { responseType: "blob" }
-            );
+            const response = await api.post("/chatbot/stream", { message: input }, { responseType: "blob" });
             const stream = response.data.stream();
             const reader = stream.getReader();
             const decoder = new TextDecoder();

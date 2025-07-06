@@ -11,7 +11,7 @@ interface MobileLayoutProps {
 const MobileLayout: React.FC<MobileLayoutProps> = ({ title, onBack, onClose, children }) => {
     return (
         <div className="w-full flex justify-center items-center font-Pretendard font-normal text-dark1">
-            <div className="w-full max-w-sm h-[768px] flex flex-col border border-light1">
+            <div className="py-4 w-full max-w-sm h-screen flex flex-col">
                 {/* ✅ 상단 헤더 */}
                 <div className="h-12 px-4 flex items-center justify-between">
                     {onBack ? (
