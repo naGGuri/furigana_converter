@@ -1,7 +1,7 @@
 # Backend/schemas/ocr.py
 
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 
 
 class OCRWord(BaseModel):
@@ -51,3 +51,36 @@ class FuriganaResult(BaseModel):
       예: ["これは漢字(かんじ)の例です。", ...]
     """
     furigana_texts: List[str]
+
+
+class OcrJobCreateResponse(BaseModel):
+    """
+    OCR 작업 생성 요청에 대한 응답 모델.
+    - job_id: 생성된 백그라운드 작업의 ID
+    - status: 작업의 초기 상태 (e.g., "PROCESSING")
+    """
+    job_id: int
+    status: str
+
+
+class OcrJobStatusResponse(BaseModel):
+    """
+    OCR 작업 상태 조회 응답 모델.
+    """
+    job_id: int
+    status: str
+
+
+class OcrResultResponse(BaseModel):
+    job_id: int
+    status: str
+    file_names: List[str]
+    raw_texts: Optional[List[str]] = None
+
+
+class PostProcessingRequest(BaseModel):
+    """
+    후처리(furigana, voca) 요청을 위한 모델.
+    - job_id: 사전 처리된 OCR 작업의 ID
+    """
+    job_id: int

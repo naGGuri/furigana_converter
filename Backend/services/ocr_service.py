@@ -10,6 +10,14 @@ import re                            # 정규 표현식 사용
 from io import BytesIO               # 바이트 스트림 처리를 위한 BytesIO
 from typing import Dict, List        # 타입 힌트를 위한 Dict, List
 from googletrans import Translator   # 영어 번역을 위한 Googletrans 라이브러리
+from sqlalchemy.orm import Session
+from fastapi import HTTPException, status
+
+# 순환 참조 방지를 위해 서비스/CRUD 레이어에서 필요한 의존성 추가
+from database.database import SessionLocal
+from crud import ocr_job as crud_ocr_job
+from database.models import ocr_job as ocr_job_model
+from database.models.user import User
 
 from schemas.ocr import OCRWord          # OCR 결과를 위한 공통 응답 스키마 임포트
 
@@ -32,7 +40,7 @@ kakasi_converter.setMode("J", "H")  # 한자(Kanji) → 히라가나(Hiragana)
 kakasi_converter.setMode("K", "H")  # 가타카나(Katakana) → 히라가나(Hiragana)
 kakasi_converter.setMode("H", "H")  # 히라가나(Hiragana) → 히라가나(Hiragana) (유지)
 kakasi_converter.setMode("r", "Hepburn")  # 로마자(Romaji) 출력 방식: 헵번식
-conv = kakasi_converter.getConverter() # 설정된 변환기 인스턴스 가져오기
+conv = kakasi_converter.getConverter()  # 설정된 변환기 인스턴스 가져오기
 
 
 def contains_kanji(text: str) -> bool:
@@ -72,21 +80,24 @@ def extract_japanese_from_image(image_bytes: bytes) -> str:
     return ''.join(japanese_lines)
 
 
-def make_vocabulary(image_bytes: bytes) -> List[OCRWord]:
+def extract_texts_from_images(image_bytes_list: List[bytes]) -> List[str]:
     """
-    일본어 이미지에서 단어장(한자 단어 + 후리가나)을 생성합니다.
-    OCR로 텍스트를 추출한 후 형태소 분석을 통해 한자 단어를 식별하고,
-    Pykakasi를 사용하여 해당 한자의 히라가나 읽는 법을 변환합니다.
-    중복된 단어는 결과에 포함되지 않습니다.
+    여러 이미지 바이트 리스트로부터 일본어 텍스트를 추출합니다.
 
     Args:
-        image_bytes (bytes): 이미지 파일의 바이트 데이터.
+        image_bytes_list (List[bytes]): 이미지 파일의 바이트 데이터 리스트.
 
     Returns:
-        List[OCRWord]: 중복이 제거된 OCRWord 객체(원본 단어, 히라가나 읽는 법) 리스트.
+        List[str]: 각 이미지에서 추출된 일본어 텍스트 리스트.
     """
-    # 이미지에서 일본어 텍스트 추출
-    text = extract_japanese_from_image(image_bytes)
+    return [extract_japanese_from_image(image_bytes) for image_bytes in image_bytes_list]
+
+
+def make_vocabulary_from_text(text: str) -> List[OCRWord]:
+    """
+    일본어 텍스트에서 단어장(한자 단어 + 후리가나)을 생성합니다.
+    형태소 분석을 통해 한자 단어를 식별하고 후리가나를 변환합니다.
+    """
     # 이미 처리된 단어를 추적하기 위한 집합(set)
     seen = set()
     # 최종 단어장 결과를 저장할 리스트
@@ -118,55 +129,57 @@ def add_translation(vocabulary: List[OCRWord]) -> List[Dict[str, str]]:
     Returns:
         List[Dict[str, str]]: 원본 단어, 히라가나 읽는 법, 영어 번역을 포함하는 딕셔너리 리스트.
     """
+    if not vocabulary:
+        return []
+
+    words_to_translate = [w.word for w in vocabulary]
     new_vocabulary = []
 
-    # 각 단어에 대해 번역 수행
-    for w in vocabulary:
-        try:
-            # Googletrans를 사용하여 일본어(ja)에서 영어(en)로 번역
-            result = translator.translate(w.word, src="ja", dest="en")
-            # 번역 결과가 유효하면 텍스트를 가져오고, 아니면 빈 문자열
-            translated = result.text if result and hasattr(
-                result, "text") else ""
-        except Exception as e:
-            # 번역 실패 시 오류 메시지 출력 및 빈 문자열 할당
-            print(f"❌ Translation failed for {w.word}: {e}")
-            translated = ""
+    try:
+        # 여러 단어를 한 번에 번역하여 API 호출 최소화
+        translated_results = translator.translate(
+            words_to_translate, src="ja", dest="en")
 
-        # 번역된 단어 정보를 딕셔너리 형태로 추가
-        new_vocabulary.append({
-            "word": w.word,
-            "reading": w.reading,
-            "translation": translated
-        })
+        for i, w in enumerate(vocabulary):
+            translated_text = translated_results[i].text if translated_results[i] and hasattr(
+                translated_results[i], "text") else ""
+            new_vocabulary.append({
+                "word": w.word,
+                "reading": w.reading,
+                "translation": translated_text
+            })
+    except Exception as e:
+        print(f"❌ Translation failed for batch: {e}")
+        # 번역 실패 시, 번역 필드를 비워두고 반환
+        for w in vocabulary:
+            new_vocabulary.append({
+                "word": w.word,
+                "reading": w.reading,
+                "translation": ""
+            })
 
     return new_vocabulary
 
 
-async def process_images_for_vocabulary(image_bytes_list: List[bytes]) -> List[List[Dict[str, str]]]:
+async def process_texts_for_vocabulary(texts: List[str]) -> List[List[Dict[str, str]]]:
     """
-    여러 이미지 바이트 리스트를 받아 각 이미지에서 단어를 추출하고 번역을 추가합니다.
-    이 함수는 OCR, 단어 추출, 번역 추가의 전체 비즈니스 로직을 캡슐화합니다.
+    여러 텍스트 문자열 리스트를 받아 각 텍스트에서 단어를 추출하고 번역을 추가합니다.
 
     Args:
-        image_bytes_list (List[bytes]): 이미지 파일들의 바이트 데이터 리스트.
+        texts (List[str]): 처리할 텍스트 문자열 리스트.
 
     Returns:
         List[List[Dict[str, str]]]: 각 이미지에서 추출된 단어 목록을 포함하는 2차원 리스트.
-                                     각 단어는 원본, 후리가나, 영어 번역을 포함합니다.
     """
     all_results = []
-    for image_bytes in image_bytes_list:
-        # 1. 한자 + 히라가나 단어 목록 생성 (중복 제거 포함)
-        words = make_vocabulary(image_bytes)
-        # 2. 번역 추가된 단어 리스트 생성
+    for text in texts:
+        words = make_vocabulary_from_text(text)
         enriched_words = add_translation(words)
-        # 3. 결과 리스트에 추가
         all_results.append(enriched_words)
     return all_results
 
 
-def make_furigana(image_bytes: bytes) -> str:
+def make_furigana_from_text(text: str) -> str:
     """
     이미지에서 추출된 일본어 문장 내의 한자에 후리가나를 삽입합니다.
     문장을 OCR로 추출하고, 형태소 분석을 통해 한자를 식별한 후,
@@ -175,13 +188,11 @@ def make_furigana(image_bytes: bytes) -> str:
     예: "日本語" → "日本語(にほんご)"
 
     Args:
-        image_bytes (bytes): 이미지 파일의 바이트 데이터.
+        text (str): 후리가나를 추가할 원본 일본어 텍스트.
 
     Returns:
         str: 후리가나가 삽입된 문장들을 줄바꿈으로 연결한 문자열.
     """
-    # OCR을 통해 이미지에서 텍스트 추출
-    text = extract_japanese_from_image(image_bytes)
     # 텍스트 정규화: 특정 구두점을 일본어 구두점으로 대체
     text = text.replace(";", "、").replace(",", "、").replace(".", "。")
     # 특수 문자 제거: 일본어, 숫자, 알파벳, 특정 구두점(。,、)만 남김
@@ -218,3 +229,64 @@ def make_furigana(image_bytes: bytes) -> str:
 
     # 모든 문장을 줄바꿈 문자로 연결하여 반환
     return '\n'.join(result)
+
+
+def initiate_ocr_job(db: Session, file_names: List[str], user: User) -> ocr_job_model.OcrJob:
+    """Creates a new OCR job in the database."""
+    return crud_ocr_job.create_ocr_job(db=db, file_names=file_names, user=user)
+
+
+def get_validated_ocr_job(db: Session, job_id: int, user_id: int) -> ocr_job_model.OcrJob:
+    """
+    Retrieves a completed OCR job and validates its status for post-processing.
+    Raises HTTPException if the job is not found or not completed.
+    """
+    job = crud_ocr_job.get_ocr_job(db, job_id=job_id, user_id=user_id)
+    if not job:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="OCR Job not found")
+    if job.status != "COMPLETED":
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail=f"OCR Job is not completed. Current status: {job.status}")
+    return job
+
+
+async def run_ocr_job(job_id: int, image_bytes_list: List[bytes]):
+    """백그라운드에서 실행될 OCR 처리 함수"""
+    # 백그라운드 작업은 자체 DB 세션을 생성해야 합니다.
+    db = SessionLocal()
+    try:
+        # 1. 이미지에서 텍스트 추출
+        raw_texts = extract_texts_from_images(image_bytes_list)
+        # 2. DB에 결과 및 상태 업데이트
+        crud_ocr_job.update_ocr_job_result(
+            db, job_id=job_id, status="COMPLETED", raw_texts=raw_texts)
+    except Exception as e:
+        print(f"❌ OCR Job {job_id} failed: {e}")
+        crud_ocr_job.update_ocr_job_result(db, job_id=job_id, status="FAILED")
+    finally:
+        db.close()
+
+
+def get_ocr_job_status(db: Session, job_id: int, user_id: int):
+    """
+    OCR 작업의 상태를 조회합니다.
+    """
+    job = crud_ocr_job.get_ocr_job(db, job_id=job_id, user_id=user_id)
+    if not job:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="OCR Job not found")
+    return {"job_id": job.id, "status": job.status}
+
+
+def get_ocr_job_result(db: Session, job_id: int, user_id: int):
+    """
+    완료된 OCR 작업의 결과를 반환합니다.
+    """
+    job = get_validated_ocr_job(db, job_id=job_id, user_id=user_id)
+    return {
+        "job_id": job.id,
+        "status": job.status,
+        "file_names": job.file_names,
+        "raw_texts": job.raw_texts,
+    }

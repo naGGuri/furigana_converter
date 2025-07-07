@@ -1,11 +1,8 @@
 # Backend/crud/user.py
 
 from sqlalchemy.orm import Session
-
-# 데이터베이스 모델과 스키마를 임포트합니다.
-from database.models.user import User  # User 모델 직접 임포트
-from schemas.auth import UserCreate  # UserCreate 스키마 직접 임포트
-# 유틸리티 함수를 임포트합니다.
+from database.models.user import User
+from schemas.auth import UserCreate
 from utils import auth_utils
 
 
@@ -38,7 +35,8 @@ def create_user(db: Session, user: UserCreate):
     # 비밀번호를 해싱합니다.
     hashed_password = auth_utils.get_password_hash(user.password)
     # 새로운 User 모델 인스턴스를 생성합니다.
-    db_user = User(email=user.email, hashed_password=hashed_password, name=user.name)
+    db_user = User(email=user.email,
+                   hashed_password=hashed_password, name=user.name)
     # 데이터베이스 세션에 사용자 객체를 추가합니다.
     db.add(db_user)
     # 변경사항을 데이터베이스에 커밋합니다.

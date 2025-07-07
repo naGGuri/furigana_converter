@@ -37,9 +37,12 @@ const Signup = () => {
             <form className="mt-10" onSubmit={handleSubmit}>
                 <div className="mb-4">
                     {/* 이름 */}
-                    <label className="font-semibold text-[14px] mb-2">Name</label>
+                    <label htmlFor="name" className="font-semibold text-[14px] mb-2">
+                        Name
+                    </label>
                     <input
                         type="text"
+                        id="name"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         className="w-full p-3 border rounded-xl focus:ring-primary1 focus:ring-2 focus:outline-none"
@@ -49,9 +52,12 @@ const Signup = () => {
                 </div>
                 {/* 이메일 */}
                 <div className="mb-4">
-                    <label className="font-semibold text-[14px] mb-2">Email</label>
+                    <label htmlFor="email" className="font-semibold text-[14px] mb-2">
+                        Email
+                    </label>
                     <input
                         type="email"
+                        id="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         className="w-full p-3 border rounded-xl focus:ring-primary1 focus:ring-2 focus:outline-none"
@@ -61,9 +67,12 @@ const Signup = () => {
                 </div>
                 {/* 패스워드 */}
                 <div className="mb-4 relative">
-                    <label className="font-semibold text-[14px] mb-2">Password</label>
+                    <label htmlFor="password" className="font-semibold text-[14px] mb-2">
+                        Password
+                    </label>
                     <input
                         type={showPassword ? "text" : "password"}
+                        id="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         className="w-full p-3 border rounded-xl focus:ring-primary1 focus:ring-2 focus:outline-none pr-10"
@@ -73,15 +82,19 @@ const Signup = () => {
                     <img
                         src={showPassword ? "/assets/visible.svg" : "/assets/invisible.svg"}
                         alt="Toggle password visibility"
-                        className="absolute right-3 top-2/3 transform -translate-y-1/2 cursor-pointer w-4 h-4"
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer w-4 h-4"
                         onClick={() => setShowPassword(!showPassword)}
                     />
                 </div>
 
                 {/* 패스워드 확인 */}
                 <div className="mb-4 relative">
+                    <label htmlFor="confirmPassword" className="font-semibold text-[14px] mb-2">
+                        Confirm Password
+                    </label>
                     <input
                         type={showConfirmPassword ? "text" : "password"}
+                        id="confirmPassword"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         className="w-full p-3 border rounded-xl focus:ring-primary1 focus:ring-2 focus:outline-none pr-10"
@@ -89,7 +102,7 @@ const Signup = () => {
                         placeholder="Confirm your password"
                     />
                     <img
-                        src={showConfirmPassword ? "/assets/visible.svsg" : "/assets/invisible.svg"}
+                        src={showConfirmPassword ? "/assets/visible.svg" : "/assets/invisible.svg"}
                         alt="Toggle confirm password visibility"
                         className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer w-4 h-4"
                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
