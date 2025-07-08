@@ -1,6 +1,7 @@
 # Backend/database/models/user.py
 
 from sqlalchemy import Column, Integer, String
+from sqlalchemy.orm import relationship
 
 # database.py에서 정의된 Base를 임포트합니다.
 # 이 Base는 SQLAlchemy 모델들이 데이터베이스 테이블과 매핑될 수 있도록 하는 기본 클래스입니다.
@@ -20,6 +21,8 @@ class User(Base):
     email = Column(String, unique=True, index=True)
     # 해시된 비밀번호: 보안을 위해 비밀번호는 해시되어 저장됩니다.
     hashed_password = Column(String)
+
+    ocr_jobs = relationship("OcrJob", back_populates="user")
 
     def __repr__(self):
         """

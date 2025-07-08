@@ -9,12 +9,12 @@ const api = axios.create({
     },
 });
 
-console.log("✅ axios baseURL:", import.meta.env.VITE_API_BASE_URL);
+// console.log("✅ axios baseURL:", import.meta.env.VITE_API_BASE_URL);
 
 // 요청 인터셉터: 토큰이 있다면 Authorization 헤더에 추가
 api.interceptors.request.use(
     (config) => {
-        const token = localStorage.getItem("accessToken");
+        const token = localStorage.getItem("token");
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }

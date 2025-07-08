@@ -13,7 +13,7 @@ router = APIRouter()
 
 # OAuth2PasswordBearer를 사용하여 토큰을 가져옵니다.
 # tokenUrl은 클라이언트가 토큰을 얻을 수 있는 URL을 지정합니다.
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/login")
 
 
 async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):

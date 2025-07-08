@@ -1,11 +1,10 @@
-// src/pages/Upload.tsx
-
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import Button from "../components/Button";
 import MobileLayout from "../components/MobileLayout";
 import UploadedFile from "../components/UploadedFile";
 import { useUploadStore } from "../store/uploadStore";
 import { useNavigate } from "react-router-dom";
+import { useLayoutStore } from "../store/layoutStore";
 
 const Upload = () => {
     const navigate = useNavigate(); // 페이지 이동을 위한 훅
@@ -13,6 +12,12 @@ const Upload = () => {
 
     const { files, addFiles, removeFile } = useUploadStore(); // 업로드된 파일 상태 관리
     const [isDragging, setIsDragging] = useState(false); // 드래그 상태
+    const { showHeader, showBottomNav } = useLayoutStore();
+
+    useEffect(() => {
+        showHeader();
+        showBottomNav();
+    }, [showHeader, showBottomNav]);
 
     // 업로드 허용 확장자 목록
     const allowedExtensions = ["jpg", "jpeg", "png"];
@@ -77,10 +82,10 @@ const Upload = () => {
 
     return (
         <MobileLayout title="Upload File" onBack={() => navigate(-1)} onClose={goToHome}>
-            <div className="flex flex-col justify-between items-center">
+            <div className="mt-4 flex flex-col justify-between items-center">
                 {/* 업로드 영역 (드래그앤드롭 또는 클릭 업로드) */}
                 <div
-                    className={`rounded w-[280px] h-[220px] flex flex-col justify-center items-center gap-[15px]
+                    className={`w-[280px] h-[220px] flex flex-col justify-center items-center gap-[15px]
                         ${
                             isDragging
                                 ? "border-4 border-dashed border-primary4 bg-primary5 "

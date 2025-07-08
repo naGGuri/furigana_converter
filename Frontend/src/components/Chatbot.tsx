@@ -29,8 +29,6 @@ const Chatbot = () => {
     }, [messages, isLoading]);
 
     const sendMessage = async () => {
-        console.log("✅ axios baseURL:", import.meta.env.VITE_API_BASE_URL);
-
         if (input.trim() === "") return;
         const userMessage: Message = { text: input, isUser: true };
         setMessages((prev) => [...prev, userMessage]);

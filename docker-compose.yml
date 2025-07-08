@@ -5,7 +5,7 @@ services:
         build:
             context: ./Frontend
             dockerfile: Dockerfile
-        container_name: hurigana-frontend
+        container_name: frontend
         ports:
             - "80:80" # 호스트의 80번 포트를 컨테이너의 80번 포트에 매핑
         depends_on:
@@ -16,7 +16,7 @@ services:
         build:
             context: ./Backend
             dockerfile: Dockerfile
-        container_name: hurigana-backend
+        container_name: backend
         ports:
             - "8000:8000"
         volumes:
@@ -25,7 +25,7 @@ services:
         depends_on:
             - db
         environment:
-            DATABASE_URL: postgresql://user:password@db:5432/hurigana-db
+            DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
             GEMINI_API_KEY: ${GEMINI_API_KEY}
             SECRET_KEY: ${SECRET_KEY}
         healthcheck:
@@ -37,15 +37,15 @@ services:
 
     db:
         image: postgres:13-alpine
-        container_name: hurigana-db
+        container_name: db
         environment:
-            POSTGRES_DB: hurigana-db
-            POSTGRES_USER: user
-            POSTGRES_PASSWORD: password
+            POSTGRES_DB: ${POSTGRES_DB}
+            POSTGRES_USER: ${POSTGRES_USER}
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
         volumes:
-            - db_data:/var/lib/postgresql/data
+            - db-data:/var/lib/postgresql/data
         ports:
             - "5432:5432"
 
 volumes:
-    db_data:
+    db-data:

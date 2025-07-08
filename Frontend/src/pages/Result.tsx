@@ -1,17 +1,26 @@
-// src/pages/Result.tsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useOCRStore } from "../store/ocrStore";
 import { useNavigate } from "react-router-dom";
 import MobileLayout from "../components/MobileLayout";
 import ExportDialog from "../components/ExportDialog";
 import jsPDF from "jspdf";
 import { PretendardJP } from "../PretendardJP-Regular";
+import { useLayoutStore } from "../store/layoutStore";
 
 const Result = () => {
     const [toggle, setToggle] = useState<"Furigana" | "Vocabulary">("Furigana");
     const [openExport, setOpenExport] = useState(false);
     const { result } = useOCRStore();
     const navigate = useNavigate();
+    const { showHeader, hideBottomNav, showBottomNav } = useLayoutStore();
+
+    useEffect(() => {
+        showHeader();
+        hideBottomNav();
+        return () => {
+            showBottomNav();
+        };
+    }, [showHeader, hideBottomNav, showBottomNav]);
 
     // ✅ PDF 내보내기
     const handleExportToPDF = () => {
