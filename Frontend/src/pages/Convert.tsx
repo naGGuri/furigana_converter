@@ -1,13 +1,22 @@
-// src/pages/Convert.tsx
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUploadStore } from "../store/uploadStore";
 import MobileLayout from "../components/MobileLayout";
 import Button from "../components/Button";
+import { useLayoutStore } from "../store/layoutStore";
 
 const Convert = () => {
     const navigate = useNavigate();
+    const { hideHeader, hideBottomNav, showHeader, showBottomNav } = useLayoutStore();
+
+    useEffect(() => {
+        hideHeader();
+        hideBottomNav();
+        return () => {
+            showHeader();
+            showBottomNav();
+        };
+    }, [hideHeader, hideBottomNav, showHeader, showBottomNav]);
 
     // Furigana 또는 Vocabulary 선택 토글 상태
     const [toggle, setToggle] = useState<"Furigana" | "Vocabulary">("Furigana");

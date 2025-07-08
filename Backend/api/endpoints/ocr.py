@@ -39,7 +39,7 @@ async def create_ocr_job(
         file_names.append(image.filename or "unknown_file")
 
     # DB에 OCR 작업 생성
-    job = ocr_service.initiate_ocr_job(
+    job = ocr_service.create_ocr_job(
         db=db, file_names=file_names, user=current_user)
 
     # 백그라운드에서 OCR 처리 실행

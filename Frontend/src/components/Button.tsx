@@ -15,7 +15,7 @@ interface ButtonProps {
 const sizeClassMap: Record<ButtonSize, string> = {
     small: "text-sm px-4 py-2 rounded-2xl",
     medium: "text-[14px] w-[130px] h-[40px] px-2 py-2 rounded-xl",
-    large: "text-[16px] w-[280px] h-[40px] rounded-xl",
+    large: "text-[14px] w-[280px] h-[48px] rounded-xl",
 };
 
 // 버튼 종류
