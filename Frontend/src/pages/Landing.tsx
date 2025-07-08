@@ -5,7 +5,7 @@ import { useLayoutStore } from "../store/layoutStore";
 import { useEffect } from "react";
 import api from "../api/config";
 
-const Home = () => {
+const LandingPage = () => {
     const navigate = useNavigate();
     const { hideHeader, hideBottomNav, showHeader, showBottomNav } = useLayoutStore();
 
@@ -40,7 +40,7 @@ const Home = () => {
         <MobileLayout>
             <div
                 className="flex flex-col items-center justify-center h-full bg-cover bg-center"
-                style={{ backgroundImage: "url(/home_background.png)" }}
+                style={{ backgroundImage: "url(/LandingPage_background.png)" }}
             >
                 <p className="font-bold text-2xl mb-4">Struggling to read Kanji</p>
                 <p className="font-normal font-xs text-center mb-8">
@@ -61,4 +61,4 @@ const Home = () => {
     );
 };
 
-export default Home;
+export default LandingPage;

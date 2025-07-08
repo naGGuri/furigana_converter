@@ -1,27 +1,27 @@
 // src/App.tsx
 
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Upload from "./pages/Upload";
-import Convert from "./pages/Convert";
-import Converting from "./pages/Converting";
-import Result from "./pages/Result";
-import Home from "./pages/Home";
+import UploadPage from "./pages/UploadPage";
+import ConvertPage from "./pages/ConvertPage";
+import ConvertingPage from "./pages/ConvertingPage";
+import ResultPage from "./pages/ResultPage";
+import LandingPage from "./pages/Landing";
 import ChatbotPage from "./pages/ChatbotPage"; // 챗봇 페이지 import
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
+import LoginPage from "./pages/LoginPage";
+import SignupPage from "./pages/SignupPage";
 
 const App = () => {
     return (
         <Router>
             <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/upload" element={<Upload />} />
-                <Route path="/convert" element={<Convert />} />
-                <Route path="/converting" element={<Converting />} />
-                <Route path="/result" element={<Result />} />
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/upload" element={<UploadPage />} />
+                <Route path="/convert" element={<ConvertPage />} />
+                <Route path="/Converting" element={<ConvertingPage />} />
+                <Route path="/result" element={<ResultPage />} />
                 <Route path="/chatbot" element={<ChatbotPage />} /> {/* 챗봇 페이지 라우트 추가 */}
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<Signup />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/signup" element={<SignupPage />} />
                 <Route path="*" element={<div>404 - Page Not Found</div>} />
             </Routes>
         </Router>
