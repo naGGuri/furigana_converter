@@ -28,7 +28,7 @@ const Login = () => {
             if (token) {
                 try {
                     await api.get("/users/me");
-                    navigate("/upload"); // 이미 로그인 상태이면 업로드 페이지로 리디렉션
+                    navigate("/"); // 이미 로그인 상태이면 메인 페이지로 리디렉션
                 } catch (error) {
                     // 토큰이 유효하지 않으면 로컬 스토리지에서 제거
                     localStorage.removeItem("token");
@@ -52,7 +52,7 @@ const Login = () => {
                 },
             });
             localStorage.setItem("token", response.data.access_token);
-            navigate("/upload");
+            navigate("/");
         } catch (error) {
             console.error("Login failed", error);
             alert("Login failed. Please check your credentials.");
@@ -63,7 +63,7 @@ const Login = () => {
         <MobileLayout title="Login" onBack={() => navigate(-1)}>
             <div
                 className="flex flex-col items-center justify-center h-full bg-cover bg-center"
-                style={{ backgroundImage: "url(/home_background_50.png)" }}
+                style={{ backgroundImage: "url(/landing_background_50.png)" }}
             >
                 <form className="flex flex-col w-full p-4" onSubmit={handleSubmit}>
                     <p className="mb-4 font-bold text-[24px] text-center">Welcome!</p>

@@ -8,9 +8,6 @@ from prometheus_fastapi_instrumentator import Instrumentator
 import google.generativeai as genai
 from config.settings import GEMINI_API_KEY
 
-# Gemini API 키 설정
-# 환경 변수에서 GEMINI_API_KEY를 가져옵니다.
-genai.configure(api_key=GEMINI_API_KEY)
 
 # 데이터베이스 테이블 생성
 # 정의된 모든 SQLAlchemy 모델(Base)에 따라 데이터베이스 테이블을 생성합니다.
@@ -18,7 +15,11 @@ genai.configure(api_key=GEMINI_API_KEY)
 Base.metadata.create_all(bind=engine)
 
 # FastAPI 애플리케이션 인스턴스 생성
-app = FastAPI()
+app = FastAPI(
+    title="Hurigana Converter API",
+    description="API for converting Japanese text and images with OCR.",
+    version="1.0.0",
+)
 
 # ✅ CORS (Cross-Origin Resource Sharing) 설정
 # 다른 도메인에서의 요청을 허용하기 위한 설정입니다.
@@ -36,7 +37,7 @@ app.add_middleware(
 
 app.include_router(ocr.router, prefix="/api", tags=["OCR"])
 app.include_router(chatbot.router, prefix="/api", tags=["Chatbot"])
-app.include_router(auth.router, prefix="/api", tags=["Auth"])  # auth 라우터 포함
+app.include_router(auth.router, prefix="/api", tags=["Auth"])
 
 
 @app.get("/health")

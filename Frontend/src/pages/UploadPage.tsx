@@ -1,17 +1,22 @@
 import React, { useRef, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { createOcrJob } from "../api/ocr";
 import Button from "../components/Button";
 import MobileLayout from "../components/MobileLayout";
 import UploadedFile from "../components/UploadedFile";
+import ConvertingDialog from "../components/ConvertingDialog";
 import { useUploadStore } from "../store/uploadStore";
-import { useNavigate } from "react-router-dom";
 import { useLayoutStore } from "../store/layoutStore";
+import { useOCRStore } from "../store/ocrStore";
 
 const Upload = () => {
     const navigate = useNavigate(); // 페이지 이동을 위한 훅
     const fileInputRef = useRef<HTMLInputElement>(null); // 숨겨진 input[type="file"]에 접근하기 위한 ref
 
     const { files, addFiles, removeFile } = useUploadStore(); // 업로드된 파일 상태 관리
+    const { setJobId } = useOCRStore();
     const [isDragging, setIsDragging] = useState(false); // 드래그 상태
+    const [isConverting, setIsConverting] = useState(false); // 변환 중 상태
     const { showHeader, showBottomNav } = useLayoutStore();
 
     useEffect(() => {
@@ -68,20 +73,35 @@ const Upload = () => {
         setIsDragging(false);
     };
 
-    // 취소 버튼 클릭 시 홈으로 이동
-    const goToHome = () => navigate("/");
-
-    // Next 버튼 클릭 시 파일이 있어야만 이동
-    const goToConvert = () => {
+    // Convert 버튼 클릭 시 파일이 있어야만 OCR 작업 실행
+    const handleConvert = async () => {
         if (files.length === 0) {
             alert("하나 이상의 파일을 업로드해야 합니다.");
             return;
         }
-        navigate("/convert");
+
+        setIsConverting(true);
+        // 파일을 FormData에 추가
+        const formData = new FormData();
+        files.forEach((file) => {
+            formData.append("images", file);
+        });
+
+        try {
+            // ocr.ts의 createOcrJob 함수 사용
+            const jobResponse = await createOcrJob(files);
+            const { job_id } = jobResponse;
+            setJobId(job_id);
+            navigate("/convert");
+        } catch (error) {
+            console.error("Error creating OCR job:", error);
+            alert("OCR 작업 생성에 실패했습니다. 다시 시도해주세요.");
+            setIsConverting(false); // 에러 발생 시에만 로딩 상태 해제
+        }
     };
 
     return (
-        <MobileLayout title="Upload File" onBack={() => navigate(-1)} onClose={goToHome}>
+        <MobileLayout title="Upload File" onBack={() => navigate(-1)}>
             <div className="mt-4 flex flex-col justify-between items-center">
                 {/* 업로드 영역 (드래그앤드롭 또는 클릭 업로드) */}
                 <div
@@ -137,11 +157,12 @@ const Upload = () => {
 
                 {/* 버튼 */}
                 <div className="flex w-full justify-center items-center">
-                    <Button size="large" variant="primary" onClick={goToConvert}>
-                        Convert
+                    <Button size="large" variant="primary" onClick={handleConvert} disabled={isConverting}>
+                        {isConverting ? "Creating Job..." : "Convert"}
                     </Button>
                 </div>
             </div>
+            <ConvertingDialog isOpen={isConverting} message="Creating OCR Job..." />
         </MobileLayout>
     );
 };
