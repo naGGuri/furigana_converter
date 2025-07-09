@@ -3,7 +3,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import UploadPage from "./pages/UploadPage";
 import ConvertPage from "./pages/ConvertPage";
-import ConvertingPage from "./pages/ConvertingPage";
 import ResultPage from "./pages/ResultPage";
 import LandingPage from "./pages/LandingPage";
 import ChatbotPage from "./pages/ChatbotPage"; // 챗봇 페이지 import
@@ -19,7 +18,6 @@ const App = () => {
                 <Route path="/home" element={<HomePage />} />
                 <Route path="/upload" element={<UploadPage />} />
                 <Route path="/convert" element={<ConvertPage />} />
-                <Route path="/Converting" element={<ConvertingPage />} />
                 <Route path="/result" element={<ResultPage />} />
                 <Route path="/chatbot" element={<ChatbotPage />} /> {/* 챗봇 페이지 라우트 추가 */}
                 <Route path="/login" element={<LoginPage />} />

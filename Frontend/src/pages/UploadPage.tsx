@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { createOcrJob } from "../api/ocr";
+import { createOcrJob, getOcrJobStatus } from "../api/ocr";
 import Button from "../components/Button";
 import MobileLayout from "../components/MobileLayout";
 import UploadedFile from "../components/UploadedFile";
@@ -14,15 +14,52 @@ const Upload = () => {
     const fileInputRef = useRef<HTMLInputElement>(null); // 숨겨진 input[type="file"]에 접근하기 위한 ref
 
     const { files, addFiles, removeFile } = useUploadStore(); // 업로드된 파일 상태 관리
-    const { setJobId } = useOCRStore();
+    const { setJobId: setOcrStoreJobId } = useOCRStore(); // ocrStore의 setJobId를 별칭으로 가져옴
     const [isDragging, setIsDragging] = useState(false); // 드래그 상태
-    const [isConverting, setIsConverting] = useState(false); // 변환 중 상태
+    const [isCreatingJob, setIsCreatingJob] = useState(false); // OCR Job 생성 중 상태
+    const [pollingJobId, setPollingJobId] = useState<number | null>(null); // 폴링할 Job ID
+    const [pollingMessage, setPollingMessage] = useState("Creating OCR Job..."); // 폴링 메시지
     const { showHeader, showBottomNav } = useLayoutStore();
 
     useEffect(() => {
         showHeader();
         showBottomNav();
     }, [showHeader, showBottomNav]);
+
+    useEffect(() => {
+        let interval: NodeJS.Timeout | undefined;
+
+        if (pollingJobId !== null) {
+            setPollingMessage("Processing OCR...");
+            interval = setInterval(async () => {
+                try {
+                    const statusResponse = await getOcrJobStatus(pollingJobId);
+                    if (statusResponse.status === "COMPLETED") {
+                        clearInterval(interval);
+                        setOcrStoreJobId(pollingJobId);
+                        navigate("/convert");
+                    } else if (statusResponse.status === "FAILED") {
+                        clearInterval(interval);
+                        alert("OCR 작업에 실패했습니다. 다시 시도해주세요.");
+                        setIsCreatingJob(false);
+                        setPollingJobId(null);
+                    }
+                } catch (error) {
+                    clearInterval(interval);
+                    console.error("Error polling OCR job status:", error);
+                    alert("OCR 작업 상태를 확인하는 중 오류가 발생했습니다. 다시 시도해주세요.");
+                    setIsCreatingJob(false);
+                    setPollingJobId(null);
+                }
+            }, 3000); // 3초마다 폴링
+        }
+
+        return () => {
+            if (interval) {
+                clearInterval(interval);
+            }
+        };
+    }, [pollingJobId, navigate, setOcrStoreJobId]);
 
     // 업로드 허용 확장자 목록
     const allowedExtensions = ["jpg", "jpeg", "png"];
@@ -80,23 +117,18 @@ const Upload = () => {
             return;
         }
 
-        setIsConverting(true);
-        // 파일을 FormData에 추가
-        const formData = new FormData();
-        files.forEach((file) => {
-            formData.append("images", file);
-        });
+        setIsCreatingJob(true);
+        setPollingMessage("Creating OCR Job...");
 
         try {
-            // ocr.ts의 createOcrJob 함수 사용
             const jobResponse = await createOcrJob(files);
             const { job_id } = jobResponse;
-            setJobId(job_id);
-            navigate("/convert");
+            setPollingJobId(job_id);
         } catch (error) {
             console.error("Error creating OCR job:", error);
             alert("OCR 작업 생성에 실패했습니다. 다시 시도해주세요.");
-            setIsConverting(false); // 에러 발생 시에만 로딩 상태 해제
+            setIsCreatingJob(false);
+            setPollingJobId(null);
         }
     };
 
@@ -157,12 +189,12 @@ const Upload = () => {
 
                 {/* 버튼 */}
                 <div className="flex w-full justify-center items-center">
-                    <Button size="large" variant="primary" onClick={handleConvert} disabled={isConverting}>
-                        {isConverting ? "Creating Job..." : "Convert"}
+                    <Button size="large" variant="primary" onClick={handleConvert} disabled={isCreatingJob}>
+                        {isCreatingJob ? "Processing..." : "Convert"}
                     </Button>
                 </div>
             </div>
-            <ConvertingDialog isOpen={isConverting} message="Creating OCR Job..." />
+            <ConvertingDialog isOpen={isCreatingJob} message={pollingMessage} />
         </MobileLayout>
     );
 };

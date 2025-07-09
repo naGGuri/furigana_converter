@@ -3,24 +3,22 @@ import { useOCRStore } from "../store/ocrStore";
 import { useNavigate } from "react-router-dom";
 import MobileLayout from "../components/MobileLayout";
 import ExportDialog from "../components/ExportDialog";
-import jsPDF from "jspdf";
 import { PretendardJP } from "../PretendardJP-Regular";
 import { useLayoutStore } from "../store/layoutStore";
+import jsPDF from "jspdf";
 
 const Result = () => {
-    const [toggle, setToggle] = useState<"Furigana" | "Vocabulary">("Furigana");
     const [openExport, setOpenExport] = useState(false);
-    const { result } = useOCRStore();
+    const { result, mode } = useOCRStore();
     const navigate = useNavigate();
-    const { showHeader, hideBottomNav, showBottomNav } = useLayoutStore();
+    const { showHeader, showBottomNav } = useLayoutStore();
 
     useEffect(() => {
         showHeader();
-        hideBottomNav();
         return () => {
             showBottomNav();
         };
-    }, [showHeader, hideBottomNav, showBottomNav]);
+    }, [showHeader, showBottomNav]);
 
     // ✅ PDF 내보내기
     const handleExportToPDF = () => {
@@ -33,7 +31,8 @@ const Result = () => {
         doc.setFont("PretendardJP");
         doc.setFontSize(12);
 
-        if (toggle === "Furigana") {
+        // 후리가나 변환 결과
+        if (mode === "Furigana") {
             result.furigana.forEach((line: string, idx: number) => {
                 doc.setFontSize(14);
                 doc.text(`📄 ${result.fileNames?.[idx] ?? `uploaded file ${idx + 1}`}`, 10, cursorY);
@@ -42,7 +41,9 @@ const Result = () => {
                 doc.text(lines, 10, cursorY);
                 cursorY += lines.length * 8 + 4;
             });
-        } else {
+        }
+        // 단어장 변환 결과
+        else {
             result.vocabulary.forEach((sentence, idx: number) => {
                 doc.setFontSize(14);
                 doc.text(`📄 ${result.fileNames?.[idx] ?? `uploaded file ${idx + 1}`}`, 10, cursorY);
@@ -68,7 +69,7 @@ const Result = () => {
         }
 
         let text = "";
-        if (toggle === "Furigana") {
+        if (mode === "Furigana") {
             text = result.furigana
                 .map((line, idx) => `📄 ${result.fileNames?.[idx] ?? `uploaded file ${idx + 1}`}\n${line}`)
                 .join("\n\n");
@@ -95,28 +96,10 @@ const Result = () => {
 
     return (
         <MobileLayout title="Result" onClose={() => navigate("/")}>
-            <div className="px-4 py-6">
-                {/* 토글 버튼 */}
-                <div className="flex w-[330px] h-[40px] p-[4px] mb-8 bg-light4 rounded-xl justify-center items-center gap-[2px]">
-                    <button
-                        onClick={() => setToggle("Furigana")}
-                        className={`w-1/2 h-full rounded-xl font-semibold transition 
-                        ${toggle === "Furigana" ? "bg-light5 text-dark1" : "bg-light4 text-dark5"}`}
-                    >
-                        Furigana
-                    </button>
-                    <button
-                        onClick={() => setToggle("Vocabulary")}
-                        className={`w-1/2 h-full rounded-xl font-semibold transition 
-                        ${toggle === "Vocabulary" ? "bg-light5 text-dark1" : "bg-light4 text-dark5"}`}
-                    >
-                        Vocabulary
-                    </button>
-                </div>
-
+            <div className="mt-4 ">
                 {/* 내보내기 버튼 */}
                 <div className="flex justify-end mb-2 cursor-pointer" onClick={() => setOpenExport(true)}>
-                    <img src="assets/export.svg" alt="내보내기" className="h-[24px] w-[24px]" />
+                    <img src="/assets/export.svg" alt="내보내기" className="h-6 w-6" />
                 </div>
 
                 {/* 내보내기 다이얼로그 */}
@@ -128,13 +111,14 @@ const Result = () => {
                 />
 
                 {/* 결과 화면 */}
-                {toggle === "Furigana" ? (
-                    <div className="w-[324px] h-[480px] rounded-md overflow-y-auto">
+                {mode === "Furigana" ? (
+                    // 후리가나 결과 화면
+                    <div className="w-full rounded-md overflow-y-auto">
                         <div className="flex flex-col items-start justify-start p-4 bg-[rgba(180,219,255,0.3)] rounded-md">
                             {result.furigana.map((line, idx) => (
                                 <div key={idx} className="mb-4">
                                     <p className="text-sm text-dark4 font-semibold mb-1">
-                                        📄 {result.fileNames?.[idx] ?? `uploaded file ${idx + 1}`}
+                                        📄 ${result.fileNames?.[idx] ?? `uploaded file ${idx + 1}`}
                                     </p>
                                     <p className="font-bold text-[18px] text-dark1 mb-1">{line}</p>
                                 </div>
@@ -142,12 +126,13 @@ const Result = () => {
                         </div>
                     </div>
                 ) : (
+                    // 단어장 결과 화면
                     <div className="w-[324px] h-[480px] rounded-md overflow-y-auto">
                         <div className="flex flex-col p-4 bg-[rgba(180,219,255,0.3)] rounded-md">
                             {result.vocabulary.map((sentence, idx) => (
                                 <div key={idx} className="w-full bg-white p-4 rounded shadow mb-4">
                                     <p className="text-sm text-dark4 font-semibold mb-2">
-                                        📄 {result.fileNames?.[idx] ?? `uploaded file ${idx + 1}`}
+                                        📄 ${result.fileNames?.[idx] ?? `uploaded file ${idx + 1}`}
                                     </p>
                                     {sentence.map((item, widx) => (
                                         <div
@@ -160,9 +145,9 @@ const Result = () => {
                                             <span className="text-dark2 font-semibold text-[12px] text-start">
                                                 {item.reading}
                                             </span>
-                                            <span className="text-right text-xs text-dark4">
+                                            {/* <span className="text-right text-xs text-dark4">
                                                 {item.translation.toLowerCase()}
-                                            </span>
+                                            </span> */}
                                         </div>
                                     ))}
                                 </div>

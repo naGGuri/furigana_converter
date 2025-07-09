@@ -17,6 +17,8 @@ interface OCRState {
     setResult: (result: OCRResult) => void;
     jobId: number | null;
     setJobId: (jobId: number | null) => void;
+    mode: "Furigana" | "Vocabulary";
+    setMode: (mode: "Furigana" | "Vocabulary") => void;
 }
 
 export const useOCRStore = create<OCRState>((set) => ({
@@ -24,4 +26,6 @@ export const useOCRStore = create<OCRState>((set) => ({
     setResult: (result) => set({ result }),
     jobId: null,
     setJobId: (jobId) => set({ jobId }),
+    mode: "Furigana",
+    setMode: (mode) => set({ mode }),
 }));

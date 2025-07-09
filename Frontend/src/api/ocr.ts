@@ -14,6 +14,11 @@ export const createOcrJob = async (files: File[]) => {
     return response.data;
 };
 
+export const getOcrJobStatus = async (jobId: number) => {
+    const response = await api.get(`/ocr/jobs/${jobId}/status`);
+    return response.data;
+};
+
 export const convertToFurigana = async (jobId: number) => {
     const response = await api.post("/ocr/furigana", { job_id: jobId });
     return response.data;
