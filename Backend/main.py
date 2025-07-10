@@ -1,12 +1,9 @@
 # Backend/main.py
 
-from fastapi import Depends, FastAPI
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from database.database import SessionLocal, engine, Base
-from api.endpoints import ocr, chatbot, auth
-from prometheus_fastapi_instrumentator import Instrumentator
-import google.generativeai as genai
-from config.settings import GEMINI_API_KEY
+from api.endpoints import ocr_router, history_router, chatbot_router, auth_router
 
 
 # 데이터베이스 테이블 생성
@@ -16,7 +13,7 @@ Base.metadata.create_all(bind=engine)
 
 # FastAPI 애플리케이션 인스턴스 생성
 app = FastAPI(
-    title="Hurigana Converter API",
+    title="Furigana Converter API",
     description="API for converting Japanese text and images with OCR.",
     version="1.0.0",
 )
@@ -35,9 +32,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(ocr.router, prefix="/api", tags=["OCR"])
-app.include_router(chatbot.router, prefix="/api", tags=["Chatbot"])
-app.include_router(auth.router, prefix="/api", tags=["Auth"])
+app.include_router(ocr_router.router, prefix="/api", tags=["OCR"])
+app.include_router(chatbot_router.router, prefix="/api", tags=["Chatbot"])
+app.include_router(auth_router.router, prefix="/api", tags=["Auth"])
+app.include_router(history_router.router, prefix="/api", tags=["History"])
 
 
 @app.get("/health")

@@ -84,3 +84,8 @@ class PostProcessingRequest(BaseModel):
     - job_id: 사전 처리된 OCR 작업의 ID
     """
     job_id: int
+
+
+class TextJobRequest(BaseModel):
+    """텍스트 입력을 위한 요청 모델"""
+    text: str

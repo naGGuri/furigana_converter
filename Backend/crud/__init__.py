@@ -4,4 +4,4 @@
 # 이 파일이 존재함으로써 Python은 'crud' 디렉토리 내의 모듈들을 임포트할 수 있습니다.
 
 # 모든 CRUD 모듈을 한 번에 임포트하여 다른 모듈에서 'from crud import user'와 같이 사용할 수 있도록 합니다.
-from . import user, ocr_job
+from . import ocr_crud, user_crud

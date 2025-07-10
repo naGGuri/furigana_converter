@@ -4,11 +4,10 @@ from sqlalchemy.orm import Session
 from jose import JWTError
 
 from database.database import get_db  # get_db 임포트 추가
-from schemas.auth import User, UserCreate, Token  # schemas.auth에서 스키마 임포트
+from schemas.auth_schema import User, UserCreate, Token  # schemas.auth에서 스키마 임포트
 from services import auth_service
-from crud import user as crud_user
 from utils import auth_utils
-
+from crud import user_crud
 router = APIRouter()
 
 # OAuth2PasswordBearer를 사용하여 토큰을 가져옵니다.
@@ -29,7 +28,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
             raise credentials_exception
     except JWTError:
         raise credentials_exception
-    user = crud_user.get_user_by_email(db, email=email)
+    user = user_crud.get_user_by_email(db, email=email)
     if user is None:
         raise credentials_exception
     return user

@@ -1,8 +1,8 @@
 # Backend/crud/user.py
 
 from sqlalchemy.orm import Session
-from database.models.user import User
-from schemas.auth import UserCreate
+from database.models.user_model import User
+from schemas.auth_schema import UserCreate
 from utils import auth_utils
 
 
