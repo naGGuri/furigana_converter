@@ -9,6 +9,8 @@ import ChatbotPage from "./pages/ChatbotPage"; // 챗봇 페이지 import
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import HomePage from "./pages/HomePage";
+import TextInputPage from "./pages/TextinputPage";
+import HistoryPage from "./pages/HistoryPage";
 
 const App = () => {
     return (
@@ -17,11 +19,13 @@ const App = () => {
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/home" element={<HomePage />} />
                 <Route path="/upload" element={<UploadPage />} />
+                <Route path="/text" element={<TextInputPage />} />
                 <Route path="/convert" element={<ConvertPage />} />
                 <Route path="/result" element={<ResultPage />} />
-                <Route path="/chatbot" element={<ChatbotPage />} /> {/* 챗봇 페이지 라우트 추가 */}
+                <Route path="/chatbot" element={<ChatbotPage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/signup" element={<SignupPage />} />
+                <Route path="/history" element={<HistoryPage />} />
                 <Route path="*" element={<div>404 - Page Not Found</div>} />
             </Routes>
         </Router>

@@ -3,13 +3,16 @@ import { useOCRStore } from "../store/ocrStore";
 import { useNavigate } from "react-router-dom";
 import MobileLayout from "../components/MobileLayout";
 import ExportDialog from "../components/ExportDialog";
-import { PretendardJP } from "../PretendardJP-Regular";
 import { useLayoutStore } from "../store/layoutStore";
-import jsPDF from "jspdf";
+import { exportToPDF } from "../utils/ExportToPDF";
+import { copyToClipboard } from "../utils/CopyToClipboard";
+import { getOcrJobResult } from "../api/ocr"; // OCR 결과를 가져오는 새로운 API 함수 임포트 (가정)
 
 const Result = () => {
     const [openExport, setOpenExport] = useState(false);
-    const { result, mode } = useOCRStore();
+    const [isLoading, setIsLoading] = useState(true); // 로딩 상태 추가
+    const [error, setError] = useState<string | null>(null); // 오류 상태 추가
+    const { jobId, result, mode, setResult, setMode } = useOCRStore(); // jobId, result, mode, setResult, setMode 가져옴
     const navigate = useNavigate();
     const { showHeader, showBottomNav } = useLayoutStore();
 
@@ -20,82 +23,74 @@ const Result = () => {
         };
     }, [showHeader, showBottomNav]);
 
-    // ✅ PDF 내보내기
-    const handleExportToPDF = () => {
-        const doc = new jsPDF();
-        const maxWidth = 180;
-        let cursorY = 20;
+    // jobId 변경 감지 및 결과 로딩 로직
+    useEffect(() => {
+        const fetchResult = async () => {
+            // jobId가 있고, 현재 result 상태가 비어있을 때만 결과를 가져옴
+            if (jobId !== null && result.furigana.length === 0 && result.vocabulary.length === 0) {
+                setIsLoading(true);
+                setError(null);
+                try {
+                    // TODO: 백엔드에 job_id로 결과를 가져오는 API 엔드포인트 구현 필요
+                    // getOcrJobResult 함수는 해당 API를 호출한다고 가정
+                    const jobResultData = await getOcrJobResult(jobId); // OCR 결과 데이터 가져오는 API 호출 (가정)
 
-        doc.addFileToVFS("PretendardJP.ttf", PretendardJP.PretendardJP);
-        doc.addFont("PretendardJP.ttf", "PretendardJP", "normal");
-        doc.setFont("PretendardJP");
-        doc.setFontSize(12);
+                    // API 응답 구조에 따라 결과 및 모드 설정
+                    if (jobResultData && jobResultData.result && jobResultData.conversion_type) {
+                        setResult(jobResultData.result); // 결과 데이터 설정
+                        setMode(jobResultData.conversion_type === "furigana" ? "Furigana" : "Vocabulary"); // 모드 설정
+                    } else {
+                        setError("결과 데이터를 불러오는데 실패했습니다.");
+                    }
+                } catch (err) {
+                    console.error("Failed to fetch OCR result:", err);
+                    setError("결과를 불러오는 중 오류가 발생했습니다.");
+                } finally {
+                    setIsLoading(false);
+                }
+            } else if (jobId === null && result.furigana.length === 0 && result.vocabulary.length === 0) {
+                // jobId도 없고 result도 비어있으면 표시할 결과가 없음
+                setIsLoading(false);
+                setError("표시할 결과가 없습니다.");
+            } else {
+                // jobId가 없거나 result가 이미 채워져 있으면 로딩 상태 해제
+                setIsLoading(false);
+                setError(null);
+            }
+        };
 
-        // 후리가나 변환 결과
-        if (mode === "Furigana") {
-            result.furigana.forEach((line: string, idx: number) => {
-                doc.setFontSize(14);
-                doc.text(`📄 ${result.fileNames?.[idx] ?? `uploaded file ${idx + 1}`}`, 10, cursorY);
-                cursorY += 10;
-                const lines = doc.splitTextToSize(line, maxWidth);
-                doc.text(lines, 10, cursorY);
-                cursorY += lines.length * 8 + 4;
-            });
-        }
-        // 단어장 변환 결과
-        else {
-            result.vocabulary.forEach((sentence, idx: number) => {
-                doc.setFontSize(14);
-                doc.text(`📄 ${result.fileNames?.[idx] ?? `uploaded file ${idx + 1}`}`, 10, cursorY);
-                cursorY += 10;
-                sentence.forEach((item) => {
-                    const line = `${item.word} (${item.reading}) - ${item.translation.toLowerCase()}`;
-                    const lines = doc.splitTextToSize(line, maxWidth);
-                    doc.text(lines, 10, cursorY);
-                    cursorY += lines.length * 8;
-                });
-                cursorY += 6;
-            });
-        }
-        console.log("PDF 저장!");
-        doc.save("ocr_result.pdf");
-    };
+        fetchResult();
+    }, [jobId, result.furigana.length, result.vocabulary.length, setResult, setMode, navigate]); // 의존성 배열 업데이트
 
-    // ✅ 클립보드 복사
-    const handleCopyToClipboard = () => {
-        if (!navigator.clipboard) {
-            alert("❌ 현재 브라우저에서 클립보드 복사가 지원되지 않습니다.");
-            return;
-        }
+    // 결과 데이터가 없을 경우 로딩 또는 오류 메시지 표시
+    if (isLoading) {
+        return (
+            <MobileLayout title="Result" onClose={() => navigate("/home")}>
+                <div className="mt-4 text-center text-dark4">Loading result...</div>
+            </MobileLayout>
+        );
+    }
 
-        let text = "";
-        if (mode === "Furigana") {
-            text = result.furigana
-                .map((line, idx) => `📄 ${result.fileNames?.[idx] ?? `uploaded file ${idx + 1}`}\n${line}`)
-                .join("\n\n");
-        } else {
-            text = result.vocabulary
-                .map((sentence, idx) => {
-                    const header = `📄 ${result.fileNames?.[idx] ?? `uploaded file ${idx + 1}`}`;
-                    const words = sentence
-                        .map((item) => `${item.word} (${item.reading}) - ${item.translation}`)
-                        .join("\n");
-                    return `${header}\n${words}`;
-                })
-                .join("\n\n");
-        }
+    if (error) {
+        return (
+            <MobileLayout title="Result" onClose={() => navigate("/home")}>
+                <div className="mt-4 text-center text-red-500">{error}</div>
+            </MobileLayout>
+        );
+    }
 
-        navigator.clipboard
-            .writeText(text)
-            .then(() => console.log("클립보드에 복사되었습니다!"))
-            .catch((err) => {
-                console.error("❌ 클립보드 복사 실패:", err);
-                alert("❌ 클립보드 복사 중 오류가 발생했습니다.");
-            });
-    };
+    // 결과 데이터가 있을 때만 결과 화면 렌더링
+    // result 객체가 비어있지 않은지 추가 확인
+    if (result.furigana.length === 0 && result.vocabulary.length === 0) {
+        return (
+            <MobileLayout title="Result" onClose={() => navigate("/home")}>
+                <div className="mt-4 text-center text-dark4">표시할 결과가 없습니다.</div>
+            </MobileLayout>
+        );
+    }
 
     return (
-        <MobileLayout title="Result" onClose={() => navigate("/")}>
+        <MobileLayout title="Result" onClose={() => navigate("/home")}>
             <div className="mt-4 ">
                 {/* 내보내기 버튼 */}
                 <div className="flex justify-end mb-2 cursor-pointer" onClick={() => setOpenExport(true)}>
@@ -106,8 +101,8 @@ const Result = () => {
                 <ExportDialog
                     isOpen={openExport}
                     onClose={() => setOpenExport(false)}
-                    onPDF={handleExportToPDF}
-                    onCopy={handleCopyToClipboard}
+                    onPDF={() => exportToPDF(mode, result)}
+                    onCopy={() => copyToClipboard(mode, result)}
                 />
 
                 {/* 결과 화면 */}

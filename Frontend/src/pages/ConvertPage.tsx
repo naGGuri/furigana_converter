@@ -10,9 +10,8 @@ import ConvertingDialog from "../components/ConvertingDialog";
 const Convert = () => {
     const navigate = useNavigate();
     const { hideBottomNav, showHeader, showBottomNav } = useLayoutStore();
+    const [toggle, setToggle] = useState<"Furigana" | "Vocabulary">("Furigana");
     const [isConverting, setIsConverting] = useState(false);
-
-    // ocrStore에서 jobId와 setMode 가져오기
     const { jobId, setMode, setResult } = useOCRStore();
 
     useEffect(() => {
@@ -23,21 +22,18 @@ const Convert = () => {
         };
     }, [hideBottomNav, showHeader, showBottomNav]);
 
-    // Furigana 또는 Vocabulary 선택 토글 상태
-    const [toggle, setToggle] = useState<"Furigana" | "Vocabulary">("Furigana");
-
     // Convert 버튼 클릭
-    const handleConvert = async () => {
+    const handleClickConvert = async () => {
         // jobId가 없으면 변환 불가
         if (jobId === null) {
-            alert("OCR 작업 정보가 없습니다. 파일을 다시 업로드해 주세요.");
+            alert("No OCR job information. Please re-upload the file.");
             navigate("/"); // 또는 적절한 페이지로 이동
             return;
         }
 
         setIsConverting(true);
         try {
-            // 2단계: 후처리 (후리가나 또는 단어장 생성) - jobId 사용
+            // 후처리 (후리가나 또는 단어장 생성) - jobId 사용
             if (toggle === "Furigana") {
                 const furiganaResult = await convertToFurigana(jobId);
                 setResult({
@@ -59,17 +55,14 @@ const Convert = () => {
             navigate(`/result`);
         } catch (error) {
             console.error("Error during conversion:", error);
-            alert("변환 중 오류가 발생했습니다.");
+            alert("An error occurred during conversion.");
         } finally {
             setIsConverting(false);
         }
     };
 
-    // 취소 버튼 클릭 시 홈으로 이동
-    const goToHome = () => navigate("/");
-
     return (
-        <MobileLayout title="Convert" onBack={() => navigate(-1)} onClose={goToHome}>
+        <MobileLayout title="Convert" onBack={() => navigate(-1)} onClose={() => navigate("/home")}>
             <ConvertingDialog isOpen={isConverting} />
             {/* 상단 제목 */}
             <div className="flex flex-col justify-between items-center">
@@ -109,7 +102,7 @@ const Convert = () => {
 
             {/* 버튼 */}
             <div className="flex w-full justify-center items-center">
-                <Button size="large" variant="primary" onClick={handleConvert}>
+                <Button size="large" variant="primary" onClick={handleClickConvert}>
                     Convert
                 </Button>
             </div>
