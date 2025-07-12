@@ -78,7 +78,7 @@ async def stream_gemini_response(message: str, history: List[Dict[str, Any]], us
             # 청크에 텍스트 내용이 있다면
             if chunk.text:
                 # SSE 형식으로 데이터를 yield합니다.
-                print(f"[DEBUG] Gemini chunk: {chunk.text}") # 디버그 출력
+                # print(f"[DEBUG] Gemini chunk: {chunk.text}")
                 yield chunk.text
                 # 클라이언트가 데이터를 처리할 시간을 주기 위해 잠시 대기합니다.
                 await asyncio.sleep(0.05)  # 응답 속도 개선을 위해 sleep 시간 단축

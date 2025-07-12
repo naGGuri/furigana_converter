@@ -94,7 +94,7 @@ def get_ocr_job_result(
     return ocr_service.get_ocr_job_result(db=db, job_id=job_id, user_id=current_user.id)
 
 
-@router.post("/ocr/voca", response_model=TranslatedVocabularyResult)
+@router.post("/ocr/voca")
 async def extract_vocabulary_from_job(
     req: PostProcessingRequest,
     db: Session = Depends(get_db),
@@ -113,13 +113,13 @@ async def extract_vocabulary_from_job(
     history_data = history_schema.ConversionHistoryCreate(
         conversion_type="vocabulary", file_names=job.file_names, result_data=results
     )
-    history_crud.create_conversion_history(
+    history = history_crud.create_conversion_history(
         db=db, history=history_data, user=current_user)
 
-    return {"kanji_words_list": results}
+    return {"history_id": history.id}
 
 
-@router.post("/ocr/furigana", response_model=FuriganaResult)
+@router.post("/ocr/furigana")
 async def get_furigana_from_job(
     req: PostProcessingRequest,
     db: Session = Depends(get_db),
@@ -140,7 +140,7 @@ async def get_furigana_from_job(
     history_data = history_schema.ConversionHistoryCreate(
         conversion_type="furigana", file_names=job.file_names, result_data=results
     )
-    history_crud.create_conversion_history(
+    history = history_crud.create_conversion_history(
         db=db, history=history_data, user=current_user)
 
-    return {"furigana_texts": results}
+    return {"history_id": history.id}

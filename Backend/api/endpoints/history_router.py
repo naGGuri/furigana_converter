@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 
@@ -39,3 +39,23 @@ def get_all_history(
     로그인한 사용자의 모든 변환 기록을 조회합니다.
     """
     return history_crud.get_conversion_histories_by_user(db=db, user=current_user)
+
+
+@router.get(
+    "/history/{history_id}",
+    response_model=history_schema.ConversionHistory,
+    summary="Get Conversion History by ID",
+)
+def get_history_by_id(
+    history_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    특정 ID를 가진 변환 기록을 조회합니다.
+    """
+    history = history_crud.get_conversion_history(db=db, history_id=history_id, user=current_user)
+    if not history:
+        raise HTTPException(status_code=404, detail="History not found")
+    print(f"DEBUG: History object returned from CRUD: {history}") # 이 줄을 추가합니다.
+    return history

@@ -96,21 +96,21 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        print(f"[DEBUG] Token received: {token}") # 디버그 출력
+        print(f"[DEBUG] Token received: {token}")
         payload = decode_access_token(token)
-        print(f"[DEBUG] Decoded payload: {payload}") # 디버그 출력
+        print(f"[DEBUG] Decoded payload: {payload}")
         username: str = payload.get("sub")
         if username is None:
-            print("[DEBUG] Username is None in payload") # 디버그 출력
+            print("[DEBUG] Username is None in payload")
             raise credentials_exception
         token_data = TokenData(username=username)
-        print(f"[DEBUG] TokenData: {token_data.username}") # 디버그 출력
+        print(f"[DEBUG] TokenData: {token_data.username}")
     except JWTError as e:
-        print(f"[DEBUG] JWTError: {e}") # 디버그 출력
+        print(f"[DEBUG] JWTError: {e}")
         raise credentials_exception
     user = user_crud.get_user_by_email(db, email=token_data.username)
     if user is None:
-        print("[DEBUG] User not found in DB") # 디버그 출력
+        print("[DEBUG] User not found in DB")
         raise credentials_exception
-    print(f"[DEBUG] User found: {user.email}") # 디버그 출력
+    print(f"[DEBUG] User found: {user.email}")
     return user

@@ -10,3 +10,8 @@ export const getAllHistory = async (): Promise<historyProps[]> => {
     const response = await api.get("/history/all");
     return response.data;
 };
+
+export const getHistoryById = async (historyId: number): Promise<historyProps> => {
+    const response = await api.get(`/history/${historyId}`);
+    return response.data;
+};
