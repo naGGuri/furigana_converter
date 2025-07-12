@@ -28,3 +28,6 @@ def update_ocr_job_result(db: Session, job_id: int, status: str, raw_texts: List
         db.commit()
         db.refresh(db_job)
     return db_job
+
+def get_ocr_job_by_id(db: Session, job_id: int) -> models.OcrJob:
+    return db.query(models.OcrJob).filter(models.OcrJob.id == job_id).first()

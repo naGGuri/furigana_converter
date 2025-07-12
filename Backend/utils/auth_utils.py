@@ -6,10 +6,19 @@
 from datetime import datetime, timedelta
 from typing import Optional
 
+from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 
 from config.settings import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
+from database.database import get_db
+from sqlalchemy.orm import Session
+from crud import user_crud
+from schemas.auth_schema import TokenData
+
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
 
 # 비밀번호 해싱을 위한 CryptContext 설정
 # bcrypt 스키마를 사용하여 비밀번호를 안전하게 해싱하고 검증합니다.
@@ -78,3 +87,30 @@ def decode_access_token(token: str):
         JWTError: 토큰이 유효하지 않거나 만료된 경우.
     """
     return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+
+
+async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        print(f"[DEBUG] Token received: {token}") # 디버그 출력
+        payload = decode_access_token(token)
+        print(f"[DEBUG] Decoded payload: {payload}") # 디버그 출력
+        username: str = payload.get("sub")
+        if username is None:
+            print("[DEBUG] Username is None in payload") # 디버그 출력
+            raise credentials_exception
+        token_data = TokenData(username=username)
+        print(f"[DEBUG] TokenData: {token_data.username}") # 디버그 출력
+    except JWTError as e:
+        print(f"[DEBUG] JWTError: {e}") # 디버그 출력
+        raise credentials_exception
+    user = user_crud.get_user_by_email(db, email=token_data.username)
+    if user is None:
+        print("[DEBUG] User not found in DB") # 디버그 출력
+        raise credentials_exception
+    print(f"[DEBUG] User found: {user.email}") # 디버그 출력
+    return user

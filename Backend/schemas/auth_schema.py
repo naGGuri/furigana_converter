@@ -1,6 +1,7 @@
 # Backend/schemas/auth.py
 
 from pydantic import BaseModel
+from typing import Optional
 
 
 class User(BaseModel):
@@ -37,3 +38,11 @@ class Token(BaseModel):
     """
     access_token: str
     token_type: str
+
+
+class TokenData(BaseModel):
+    """
+    토큰 페이로드 데이터를 위한 Pydantic 모델.
+    JWT 토큰에서 추출된 사용자 이름(email)을 저장합니다.
+    """
+    username: Optional[str] = None
