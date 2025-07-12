@@ -9,6 +9,7 @@ interface ButtonProps {
     children: React.ReactNode;
     onClick?: () => void;
     className?: string;
+    disabled?: boolean;
 }
 
 // 버튼 사이즈
@@ -20,17 +21,26 @@ const sizeClassMap: Record<ButtonSize, string> = {
 
 // 버튼 종류
 const variantClassMap: Record<ButtonVariant, string> = {
-    primary: "bg-primary1 text-white border-2 border-primary1 hover:bg-blue-700 hover:border-blue-700 ",
+    primary: "bg-primary1 text-white border-2 border-primary1 hover:bg-blue-700 hover:border-blue-700",
     secondary: "bg-white text-primary1 border-2 border-primary1 hover:bg-blue-50",
 };
 
-const Button: React.FC<ButtonProps> = ({ size = "medium", variant = "primary", children, onClick, className = "" }) => {
+const Button: React.FC<ButtonProps> = ({
+    size = "medium",
+    variant = "primary",
+    children,
+    onClick,
+    className = "",
+    disabled = false,
+}) => {
     return (
         <button
             onClick={onClick}
+            disabled={disabled}
             className={`
-                font-Pretendard font-medium transition duration-100 
+                font-Pretendard font-medium transition duration-100
                 ${sizeClassMap[size]} ${variantClassMap[variant]} ${className}
+                ${disabled ? "opacity-50 cursor-not-allowed" : ""}
             `}
         >
             {children}

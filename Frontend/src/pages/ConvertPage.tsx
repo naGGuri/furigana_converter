@@ -1,44 +1,69 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useUploadStore } from "../store/uploadStore";
 import MobileLayout from "../components/MobileLayout";
 import Button from "../components/Button";
 import { useLayoutStore } from "../store/layoutStore";
+import { useOCRStore } from "../store/ocrStore"; // ocrStore 임포트 추가
+import { convertToFurigana, convertToVocabulary } from "../api/ocr";
+import ConvertingDialog from "../components/ConvertingDialog";
 
 const Convert = () => {
     const navigate = useNavigate();
-    const { hideHeader, hideBottomNav, showHeader, showBottomNav } = useLayoutStore();
+    const { hideBottomNav, showHeader, showBottomNav } = useLayoutStore();
+    const [toggle, setToggle] = useState<"Furigana" | "Vocabulary">("Furigana");
+    const [isConverting, setIsConverting] = useState(false);
+    const { jobId, setMode, setResult } = useOCRStore();
 
     useEffect(() => {
-        hideHeader();
         hideBottomNav();
         return () => {
             showHeader();
             showBottomNav();
         };
-    }, [hideHeader, hideBottomNav, showHeader, showBottomNav]);
+    }, [hideBottomNav, showHeader, showBottomNav]);
 
-    // Furigana 또는 Vocabulary 선택 토글 상태
-    const [toggle, setToggle] = useState<"Furigana" | "Vocabulary">("Furigana");
-
-    // 업로드된 파일 전역 상태에서 불러오기
-    const files = useUploadStore((state) => state.files);
-
-    // Convert 버튼 클릭 → 파일이 있어야만 /converting 페이지로 이동
-    const goToConverting = () => {
-        if (files.length === 0) {
-            alert("파일을 먼저 업로드해 주세요.");
+    // Convert 버튼 클릭
+    const handleClickConvert = async () => {
+        // jobId가 없으면 변환 불가
+        if (jobId === null) {
+            alert("No OCR job information. Please re-upload the file.");
+            navigate("/"); // 또는 적절한 페이지로 이동
             return;
         }
-        // 사용자가 선택한 모드에 따라 쿼리로 전달 (ex. /converting?mode=Furigana)
-        navigate(`/converting?mode=${toggle}`);
+
+        setIsConverting(true);
+        try {
+            // 후처리 (후리가나 또는 단어장 생성) - jobId 사용
+            if (toggle === "Furigana") {
+                const furiganaResult = await convertToFurigana(jobId);
+                setResult({
+                    furigana: furiganaResult.furigana_texts,
+                    vocabulary: [], // 후리가나 변환 시 단어장은 비워둠
+                    fileNames: furiganaResult.fileNames || [], // 파일 이름도 함께 저장
+                });
+                setMode("Furigana");
+            } else {
+                const vocabularyResult = await convertToVocabulary(jobId);
+                setResult({
+                    furigana: [], // 단어장 변환 시 후리가나는 비워둠
+                    vocabulary: vocabularyResult.kanji_words_list,
+                    fileNames: vocabularyResult.fileNames || [], // 파일 이름도 함께 저장
+                });
+                setMode("Vocabulary");
+            }
+
+            navigate(`/result`);
+        } catch (error) {
+            console.error("Error during conversion:", error);
+            alert("An error occurred during conversion.");
+        } finally {
+            setIsConverting(false);
+        }
     };
 
-    // 취소 버튼 클릭 시 홈으로 이동
-    const goToHome = () => navigate("/");
-
     return (
-        <MobileLayout title="Convert" onBack={() => navigate(-1)} onClose={goToHome}>
+        <MobileLayout title="Convert" onBack={() => navigate(-1)} onClose={() => navigate("/home")}>
+            <ConvertingDialog isOpen={isConverting} />
             {/* 상단 제목 */}
             <div className="flex flex-col justify-between items-center">
                 {/* 토글 버튼 */}
@@ -77,7 +102,7 @@ const Convert = () => {
 
             {/* 버튼 */}
             <div className="flex w-full justify-center items-center">
-                <Button size="large" variant="primary" onClick={goToConverting}>
+                <Button size="large" variant="primary" onClick={handleClickConvert}>
                     Convert
                 </Button>
             </div>

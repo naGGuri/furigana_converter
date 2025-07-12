@@ -5,7 +5,8 @@ from fastapi.responses import StreamingResponse
 
 # 챗봇 비즈니스 로직을 담당하는 서비스 모듈을 임포트합니다.
 from services import chatbot_service
-from schemas.chatbot import ChatRequest  # schemas.chatbot에서 ChatRequest 임포트
+from schemas.chatbot_schema import ChatRequest
+
 
 router = APIRouter()
 

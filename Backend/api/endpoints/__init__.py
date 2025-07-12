@@ -4,8 +4,9 @@
 # 이 파일이 존재함으로써 Python은 'endpoints' 디렉토리 내의 모듈들을 임포트할 수 있습니다.
 
 # 예를 들어, main.py에서 다음과 같이 임포트할 수 있습니다:
-# from api.endpoints import ocr, chatbot, auth
+# from api.endpoints import ocr_router, chatbot_endpoints, auth_endpoints, history_router
 
-from . import ocr
-from . import chatbot
-from . import auth
+from . import ocr_router
+from . import chatbot_router
+from . import auth_router
+from . import history_router

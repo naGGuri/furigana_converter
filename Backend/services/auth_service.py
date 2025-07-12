@@ -4,8 +4,8 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from utils import auth_utils
-from crud import user as crud_user  # crud.user 모듈을 crud_user로 임포트
-from schemas.auth import UserCreate, Token  # schemas.auth에서 스키마 임포트
+from crud import user_crud as crud_user  # crud.user 모듈을 crud_user로 임포트
+from schemas.auth_schema import UserCreate, Token  # schemas.auth에서 스키마 임포트
 from config.settings import ACCESS_TOKEN_EXPIRE_MINUTES
 
 

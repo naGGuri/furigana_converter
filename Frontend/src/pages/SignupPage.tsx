@@ -23,7 +23,7 @@ const Signup = () => {
             if (token) {
                 try {
                     await api.get("/users/me");
-                    navigate("/home"); // 이미 로그인 상태이면 메인 페이지로 리디렉션
+                    navigate("/"); // 이미 로그인 상태이면 메인 페이지로 리디렉션
                 } catch (error) {
                     // 토큰이 유효하지 않으면 로컬 스토리지에서 제거
                     localStorage.removeItem("token");

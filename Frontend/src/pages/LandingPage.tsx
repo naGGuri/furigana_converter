@@ -5,7 +5,7 @@ import { useLayoutStore } from "../store/layoutStore";
 import { useEffect } from "react";
 import api from "../api/config";
 
-const Home = () => {
+const LandingPage = () => {
     const navigate = useNavigate();
     const { hideHeader, hideBottomNav, showHeader, showBottomNav } = useLayoutStore();
 
@@ -25,8 +25,8 @@ const Home = () => {
                 try {
                     // 토큰 유효성 검사
                     await api.get("/users/me");
-                    // 유효하면 업로드 페이지로 이동
-                    navigate("/upload");
+                    // 유효하면 메인 페이지로 이동
+                    navigate("/home");
                 } catch (error) {
                     // 유효하지 않으면 토큰 삭제
                     localStorage.removeItem("token");
@@ -40,7 +40,7 @@ const Home = () => {
         <MobileLayout>
             <div
                 className="flex flex-col items-center justify-center h-full bg-cover bg-center"
-                style={{ backgroundImage: "url(/home_background.png)" }}
+                style={{ backgroundImage: "url(/landing_background.png)" }}
             >
                 <p className="font-bold text-2xl mb-4">Struggling to read Kanji</p>
                 <p className="font-normal font-xs text-center mb-8">
@@ -61,4 +61,4 @@ const Home = () => {
     );
 };
 
-export default Home;
+export default LandingPage;

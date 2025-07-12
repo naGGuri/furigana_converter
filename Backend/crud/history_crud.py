@@ -1,9 +1,9 @@
 # Backend/crud/history.py
 
 from sqlalchemy.orm import Session
-from database.models import history as history_model
-from schemas import history as history_schema
-from database.models.user import User
+from database.models import history_model
+from schemas import history_schema
+from database.models.user_model import User
 
 
 def create_conversion_history(

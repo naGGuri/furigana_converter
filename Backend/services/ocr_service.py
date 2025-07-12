@@ -1,9 +1,9 @@
 # Backend/services/ocr_service.py
 
-from schemas.ocr import OCRWord
-from database.models.user import User
-from database.models import ocr_job as ocr_job_model
-from crud import ocr_job as crud_ocr_job
+from schemas.ocr_schema import OCRWord
+from database.models.user_model import User
+from database.models import ocr_job_model
+from crud import ocr_crud as crud_ocr_job
 from database.database import SessionLocal
 from easyocr import Reader
 from fugashi import Tagger
@@ -168,6 +168,23 @@ async def run_ocr_job(job_id: int, image_bytes_list: List[bytes]):
         db.close()
 
 
+def process_text_and_save(db: Session, job_id: int, text: str):
+    """
+    텍스트를 처리하고 결과를 DB에 저장하는 동기 함수.
+    """
+    try:
+        # DB에 결과 및 상태 업데이트 (결과를 리스트 형태로 저장)
+        crud_ocr_job.update_ocr_job_result(
+            db, job_id=job_id, status="COMPLETED", raw_texts=[text])
+    except Exception as e:
+        print(f"❌ Text Processing Job {job_id} failed: {e}")
+        crud_ocr_job.update_ocr_job_result(db, job_id=job_id, status="FAILED")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An error occurred during text processing."
+        )
+
+
 def get_ocr_job_status(db: Session, job_id: int, user_id: int):
     """
     OCR 작업의 상태를 조회합니다.
@@ -179,16 +196,34 @@ def get_ocr_job_status(db: Session, job_id: int, user_id: int):
     return {"job_id": job.id, "status": job.status}
 
 
-def get_ocr_job_result(db: Session, job_id: int, user_id: int):
+# get_ocr_job_result 함수를 async로 변경
+async def get_ocr_job_result(db: Session, job_id: int, user_id: int):
     """
     완료된 OCR 작업의 결과를 반환합니다.
     """
     job = get_validated_ocr_job(db, job_id=job_id, user_id=user_id)
+
+    final_result = {
+        "furigana": [],
+        "vocabulary": [],
+        "fileNames": job.file_names
+    }
+
+    conversion_type = job.conversion_type if hasattr(job, 'conversion_type') else None
+
+    if conversion_type == "furigana":
+        final_result["furigana"] = [make_furigana_from_text(text) for text in job.raw_texts]
+
+    elif conversion_type == "vocabulary":
+        final_result["vocabulary"] = await process_texts_for_vocabulary(job.raw_texts)
+
     return {
         "job_id": job.id,
         "status": job.status,
         "file_names": job.file_names,
         "raw_texts": job.raw_texts,
+        "result": final_result,
+        "conversion_type": conversion_type
     }
 
 
