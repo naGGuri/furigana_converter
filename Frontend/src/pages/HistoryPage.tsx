@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import MobileLayout from "../components/MobileLayout";
 import { useNavigate } from "react-router-dom";
-import { getRecentHistory } from "../api/history"; // Assuming this fetches all history or we need a new one
+import { getAllHistory } from "../api/history";
 import type { historyProps } from "../types/history";
 import { format } from "date-fns";
 import { useOCRStore } from "../store/ocrStore";
@@ -24,9 +24,7 @@ const HistoryPage = () => {
         const fetchHistory = async () => {
             try {
                 setIsLoading(true);
-                // Assuming getRecentHistory fetches all history for the logged-in user
-                // If not, we might need a new API function like getAllHistory
-                const historyData = await getRecentHistory();
+                const historyData = await getAllHistory();
                 setHistoryList(historyData);
             } catch (err) {
                 console.error("Failed to fetch history:", err);

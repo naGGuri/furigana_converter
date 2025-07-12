@@ -24,3 +24,18 @@ def get_recent_history(
     로그인한 사용자의 최근 변환 기록을 최대 5개까지 조회합니다.
     """
     return history_crud.get_conversion_histories_by_user(db=db, user=current_user, limit=5)
+
+
+@router.get(
+    "/history/all",
+    response_model=List[history_schema.ConversionHistory],
+    summary="Get All Conversion History",
+)
+def get_all_history(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    로그인한 사용자의 모든 변환 기록을 조회합니다.
+    """
+    return history_crud.get_conversion_histories_by_user(db=db, user=current_user)

@@ -18,6 +18,10 @@ def create_conversion_history(
     return db_history
 
 
-def get_conversion_histories_by_user(db: Session, user: User, skip: int = 0, limit: int = 100):
+def get_conversion_histories_by_user(db: Session, user: User, skip: int = 0, limit: int = None):
     """특정 사용자의 변환 기록 목록을 조회합니다."""
-    return db.query(history_model.ConversionHistory).filter(history_model.ConversionHistory.user_id == user.id).order_by(history_model.ConversionHistory.created_at.desc()).offset(skip).limit(limit).all()
+    query = db.query(history_model.ConversionHistory).filter(history_model.ConversionHistory.user_id ==
+                                                             user.id).order_by(history_model.ConversionHistory.created_at.desc()).offset(skip)
+    if limit:
+        query = query.limit(limit)
+    return query.all()
