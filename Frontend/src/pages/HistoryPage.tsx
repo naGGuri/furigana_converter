@@ -62,7 +62,7 @@ const HistoryPage = () => {
     return (
         <MobileLayout title="History" onBack={() => navigate(-1)}>
             <div className="flex flex-col h-full p-4 space-y-4">
-                <h1 className="text-2xl font-bold text-dark1">Activity History</h1>
+                {/* <h1 className="text-2xl font-bold text-dark1">Activity History</h1> */}
 
                 {isLoading && <p className="text-center text-dark4">Loading history...</p>}
                 {error && <p className="text-center text-red-500">{error}</p>}
