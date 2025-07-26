@@ -13,7 +13,7 @@ const Upload = () => {
     const navigate = useNavigate(); // 페이지 이동을 위한 훅
     const fileInputRef = useRef<HTMLInputElement>(null); // 숨겨진 input[type="file"]에 접근하기 위한 ref
 
-    const { files, addFiles, removeFile } = useUploadStore(); // 업로드된 파일 상태 관리
+    const { files, addFiles, removeFile, clearFiles } = useUploadStore(); // 업로드된 파일 상태 관리
     const { setJobId: setOcrStoreJobId } = useOCRStore(); // ocrStore의 setJobId를 별칭으로 가져옴
     const [isDragging, setIsDragging] = useState(false); // 드래그 상태
     const [isCreatingJob, setIsCreatingJob] = useState(false); // OCR Job 생성 중 상태
@@ -133,11 +133,11 @@ const Upload = () => {
     };
 
     return (
-        <MobileLayout title="Upload File" onBack={() => navigate(-1)}>
-            <div className="mt-4 flex flex-col justify-between items-center">
+        <MobileLayout title="Upload" onBack={() => navigate(-1)}>
+            <div className="mt-4 px-4 flex flex-col justify-between items-center">
                 {/* 업로드 영역 (드래그앤드롭 또는 클릭 업로드) */}
                 <div
-                    className={`w-[280px] h-[220px] flex flex-col justify-center items-center gap-[15px]
+                    className={`w-full h-[220px] flex flex-col justify-center items-center gap-[15px]
                         ${
                             isDragging
                                 ? "border-4 border-dashed border-primary4 bg-primary5 "
@@ -177,22 +177,40 @@ const Upload = () => {
                 </div>
 
                 {/* 지원 포맷 안내 */}
-                <p className="font-normal text-light1 text-[12px] mt-[4px]">Supported formats: JPG, PNG</p>
+                <p className="mt-4 w-full font-normal text-light1 text-[12px] text-start ">
+                    Supported formats: JPG, PNG
+                </p>
 
                 {/* 업로드된 파일 목록 */}
-                <p className="font-[16px] my-[20px]">Uploaded Files</p>
-                <div className="w-[280px] h-[230px] mb-[20px] overflow-y-auto">
-                    {files.map((file, index) => (
-                        <UploadedFile key={index} file={file} onDelete={() => removeFile(index)} />
-                    ))}
+                <div className="mt-4 flex w-full justify-between items-center">
+                    <p className="font-bold text-[24px]">Uploaded Files</p>
+                    <p className="font-normal text-[12px] text-primary1 cursor-pointer" onClick={clearFiles}>Clear All</p>
+                </div>
+
+                <div className="mt-4 w-full flex flex-col gap-2 overflow-y-auto">
+                    {files.length === 0 ? (
+                        <p className="text-center text-light1 text-[16px] mt-8">No uploaded images</p>
+                    ) : (
+                        files.map((file, index) => (
+                            <UploadedFile key={index} file={file} onDelete={() => removeFile(index)} />
+                        ))
+                    )}
                 </div>
 
                 {/* 버튼 */}
-                <div className="flex w-full justify-center items-center">
-                    <Button size="large" variant="primary" onClick={handleConvert} disabled={isCreatingJob}>
-                        {isCreatingJob ? "Processing..." : "Convert"}
-                    </Button>
-                </div>
+                {files.length > 0 && (
+                    <div className="mt-4 flex w-full justify-center items-center">
+                        <Button
+                            size="large"
+                            variant="primary"
+                            onClick={handleConvert}
+                            disabled={isCreatingJob}
+                            className="w-full"
+                        >
+                            {isCreatingJob ? "Processing..." : "Convert"}
+                        </Button>
+                    </div>
+                )}
             </div>
             <ConvertingDialog isOpen={isCreatingJob} message={pollingMessage} />
         </MobileLayout>
