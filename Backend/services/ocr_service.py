@@ -161,6 +161,16 @@ async def run_ocr_job(job_id: int, image_bytes_list: List[bytes]):
         # 3. DB에 결과 및 상태 업데이트
         crud_ocr_job.update_ocr_job_result(
             db, job_id=job_id, status="COMPLETED", raw_texts=corrected_texts)
+
+        # RAG 벡터 저장소에 문서 추가
+        from services import rag_service
+        # job 객체를 다시 가져와 file_names와 user_id에 접근
+        job = crud_ocr_job.get_ocr_job_by_id(db, job_id=job_id)
+        if job and job.file_names:
+            metadatas = [{'job_id': job_id, 'file_name': file_name, 'user_id': job.user_id} for file_name in job.file_names]
+            rag_service.add_documents_to_vector_store(corrected_texts, metadatas=metadatas)
+        rag_service.add_documents_to_vector_store(
+            corrected_texts, metadatas=metadatas)
     except Exception as e:
         print(f"❌ OCR Job {job_id} failed: {e}")
         crud_ocr_job.update_ocr_job_result(db, job_id=job_id, status="FAILED")
@@ -209,10 +219,12 @@ async def get_ocr_job_result(db: Session, job_id: int, user_id: int):
         "fileNames": job.file_names
     }
 
-    conversion_type = job.conversion_type if hasattr(job, 'conversion_type') else None
+    conversion_type = job.conversion_type if hasattr(
+        job, 'conversion_type') else None
 
     if conversion_type == "furigana":
-        final_result["furigana"] = [make_furigana_from_text(text) for text in job.raw_texts]
+        final_result["furigana"] = [
+            make_furigana_from_text(text) for text in job.raw_texts]
 
     elif conversion_type == "vocabulary":
         final_result["vocabulary"] = await process_texts_for_vocabulary(job.raw_texts)

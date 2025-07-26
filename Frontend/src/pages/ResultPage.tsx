@@ -6,7 +6,7 @@ import ExportDialog from "../components/ExportDialog";
 import { useLayoutStore } from "../store/layoutStore";
 import { exportToPDF } from "../utils/ExportToPDF";
 import { copyToClipboard } from "../utils/CopyToClipboard";
-import { getOcrJobResult } from "../api/ocr"; // OCR 결과를 가져오는 새로운 API 함수 임포트 (가정)
+import { getHistoryById } from "../api/history";
 
 const Result = () => {
     const [openExport, setOpenExport] = useState(false);
@@ -26,41 +26,33 @@ const Result = () => {
     // jobId 변경 감지 및 결과 로딩 로직
     useEffect(() => {
         const fetchResult = async () => {
-            // jobId가 있고, 현재 result 상태가 비어있을 때만 결과를 가져옴
-            if (jobId !== null && result.furigana.length === 0 && result.vocabulary.length === 0) {
+            if (jobId !== null) {
                 setIsLoading(true);
                 setError(null);
                 try {
-                    // TODO: 백엔드에 job_id로 결과를 가져오는 API 엔드포인트 구현 필요
-                    // getOcrJobResult 함수는 해당 API를 호출한다고 가정
-                    const jobResultData = await getOcrJobResult(jobId); // OCR 결과 데이터 가져오는 API 호출 (가정)
-
-                    // API 응답 구조에 따라 결과 및 모드 설정
-                    if (jobResultData && jobResultData.result && jobResultData.conversion_type) {
-                        setResult(jobResultData.result); // 결과 데이터 설정
-                        setMode(jobResultData.conversion_type === "furigana" ? "Furigana" : "Vocabulary"); // 모드 설정
-                    } else {
-                        setError("결과 데이터를 불러오는데 실패했습니다.");
-                    }
+                    const historyData = await getHistoryById(jobId);
+                    const resultData = {
+                        furigana: historyData.furigana_result || [],
+                        vocabulary: historyData.voca_result || [],
+                        fileNames: historyData.file_names || [],
+                    };
+                    setResult(resultData);
+                    setMode(historyData.conversion_type === "furigana" ? "Furigana" : "Vocabulary");
                 } catch (err) {
-                    console.error("Failed to fetch OCR result:", err);
-                    setError("결과를 불러오는 중 오류가 발생했습니다.");
+                    console.error("Failed to fetch history result:", err);
+                    alert("결과를 불러오는 중 오류가 발생했습니다.");
+                    setIsLoading(false);
                 } finally {
                     setIsLoading(false);
                 }
-            } else if (jobId === null && result.furigana.length === 0 && result.vocabulary.length === 0) {
-                // jobId도 없고 result도 비어있으면 표시할 결과가 없음
+            } else {
                 setIsLoading(false);
                 setError("표시할 결과가 없습니다.");
-            } else {
-                // jobId가 없거나 result가 이미 채워져 있으면 로딩 상태 해제
-                setIsLoading(false);
-                setError(null);
             }
         };
 
         fetchResult();
-    }, [jobId, result.furigana.length, result.vocabulary.length, setResult, setMode, navigate]); // 의존성 배열 업데이트
+    }, [jobId, setResult, setMode, navigate]); // 의존성 배열 업데이트
 
     // 결과 데이터가 없을 경우 로딩 또는 오류 메시지 표시
     if (isLoading) {
@@ -80,8 +72,10 @@ const Result = () => {
     }
 
     // 결과 데이터가 있을 때만 결과 화면 렌더링
-    // result 객체가 비어있지 않은지 추가 확인
-    if (result.furigana.length === 0 && result.vocabulary.length === 0) {
+    // mode에 따라 적절한 결과 배열의 길이를 확인
+    const hasResults = (mode === "Furigana" && result.furigana.length > 0) || (mode === "Vocabulary" && result.vocabulary.length > 0);
+
+    if (!hasResults) {
         return (
             <MobileLayout title="Result" onClose={() => navigate("/home")}>
                 <div className="mt-4 text-center text-dark4">표시할 결과가 없습니다.</div>
@@ -94,7 +88,7 @@ const Result = () => {
             <div className="mt-4 ">
                 {/* 내보내기 버튼 */}
                 <div className="flex justify-end mb-2 cursor-pointer" onClick={() => setOpenExport(true)}>
-                    <img src="/assets/export.svg" alt="내보내기" className="h-6 w-6" />
+                    <img src="assets/export.svg" alt="내보내기" className="h-6 w-6" />
                 </div>
 
                 {/* 내보내기 다이얼로그 */}

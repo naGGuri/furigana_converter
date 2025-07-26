@@ -17,14 +17,14 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({ title, onBack, onClose, chi
             <div className="py-4 w-full max-w-sm h-screen flex flex-col">
                 {/* ✅ 상단 헤더 */}
                 {isHeaderVisible && (
-                    <div className="h-12 px-4 flex items-center justify-between">
+                    <div className="h-12 px-4 flex items-center justify-between cursor-pointer">
                         {onBack ? (
                             <img src="assets/arrow_left.svg" alt="뒤로가기" className="w-5 h-5" onClick={onBack} />
                         ) : (
                             <div className="w-[32px]" />
                         )}
 
-                        <p className="font-Pretendard text-[20px] font-semibold text-center flex-1">{title}</p>
+                        <p className="font-Pretendard text-[16px] font-bold text-center flex-1">{title}</p>
 
                         {onClose ? (
                             <img src="assets/close_blue.svg" alt="닫기" className="w-5 h-5" onClick={onClose} />

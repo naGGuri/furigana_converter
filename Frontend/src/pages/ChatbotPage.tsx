@@ -63,17 +63,11 @@ const ChatbotPage = () => {
                     break;
                 }
                 const chunk = decoder.decode(value);
-                const lines = chunk.split("\n\n");
-                for (const line of lines) {
-                    if (line.startsWith("data: ")) {
-                        const data = line.substring(6);
-                        setMessages((prev) =>
-                            prev.map((msg, index) =>
-                                index === prev.length - 1 ? { ...msg, text: msg.text + data } : msg
-                            )
-                        );
-                    }
-                }
+                setMessages((prev) =>
+                    prev.map((msg, index) =>
+                        index === prev.length - 1 ? { ...msg, text: msg.text + chunk } : msg
+                    )
+                );
             }
         } catch (error) {
             console.error("Error sending message:", error);

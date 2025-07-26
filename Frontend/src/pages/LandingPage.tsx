@@ -52,9 +52,6 @@ const LandingPage = () => {
                     <Button size="small" variant="primary" onClick={() => navigate("/login")}>
                         Let's Start
                     </Button>
-                    <Button size="small" variant="secondary" onClick={() => navigate("/chatbot")}>
-                        Chat with AI Tutor
-                    </Button>
                 </div>
             </div>
         </MobileLayout>

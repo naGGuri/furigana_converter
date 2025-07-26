@@ -3,4 +3,6 @@ export interface historyProps {
     conversion_type: "furigana" | "vocabulary";
     file_names: string[];
     created_at: string; // ISO 8601 date string
+    furigana_result?: string[];
+    voca_result?: { word: string; reading: string; translation: string }[][];
 }

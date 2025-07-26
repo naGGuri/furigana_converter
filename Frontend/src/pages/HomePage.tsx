@@ -8,10 +8,10 @@ import { format } from "date-fns";
 import { useOCRStore } from "../store/ocrStore";
 
 const HomePage = () => {
-    const navigate = useNavigate(); // 페이지 이동을 위한 훅
+    const navigate = useNavigate();
     const [userName, setUserName] = useState<string | null>(null);
     const [recentHistory, setRecentHistory] = useState<historyProps[]>([]);
-    const { setJobId, setMode } = useOCRStore(); // useOCRStore에서 setJobId와 setMode 액션을 가져옴
+    const { setJobId, setMode } = useOCRStore();
 
     const menuItems = [
         { label: "Image", icon: "/assets/image_white.svg", path: "/upload" },
@@ -61,10 +61,9 @@ const HomePage = () => {
         // 히스토리 아이템 클릭 시 해당 결과 페이지로 이동
         setJobId(item.id);
         setMode(item.conversion_type === "furigana" ? "Furigana" : "Vocabulary");
-        navigate("/result"); // /convert 대신 /result로 이동
+        navigate("/result");
     };
 
-    // Helper function to format history item for display
     const formatHistoryItem = (item: historyProps) => {
         const isText = item.file_names.includes("Text Input");
         const type = item.conversion_type === "furigana" ? "Furigana Conversion" : "Vocabulary Extraction";
@@ -117,7 +116,7 @@ const HomePage = () => {
                                     <div
                                         key={item.id}
                                         className="bg-light5 p-4 rounded-lg flex items-center justify-between cursor-pointer hover:bg-gray-200"
-                                        onClick={() => handleHistoryClick(item)} // 수정된 클릭 핸들러 호출
+                                        onClick={() => handleHistoryClick(item)}
                                     >
                                         <div className="flex items-center gap-4 overflow-hidden">
                                             <img src={icon} alt={type} className="w-6 h-6 flex-shrink-0" />

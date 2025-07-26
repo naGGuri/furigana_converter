@@ -12,7 +12,7 @@ const Convert = () => {
     const { hideBottomNav, showHeader, showBottomNav } = useLayoutStore();
     const [toggle, setToggle] = useState<"Furigana" | "Vocabulary">("Furigana");
     const [isConverting, setIsConverting] = useState(false);
-    const { jobId, setMode, setResult } = useOCRStore();
+    const { jobId, setJobId, setMode } = useOCRStore();
 
     useEffect(() => {
         hideBottomNav();
@@ -36,19 +36,11 @@ const Convert = () => {
             // 후처리 (후리가나 또는 단어장 생성) - jobId 사용
             if (toggle === "Furigana") {
                 const furiganaResult = await convertToFurigana(jobId);
-                setResult({
-                    furigana: furiganaResult.furigana_texts,
-                    vocabulary: [], // 후리가나 변환 시 단어장은 비워둠
-                    fileNames: furiganaResult.fileNames || [], // 파일 이름도 함께 저장
-                });
+                setJobId(furiganaResult.history_id);
                 setMode("Furigana");
             } else {
                 const vocabularyResult = await convertToVocabulary(jobId);
-                setResult({
-                    furigana: [], // 단어장 변환 시 후리가나는 비워둠
-                    vocabulary: vocabularyResult.kanji_words_list,
-                    fileNames: vocabularyResult.fileNames || [], // 파일 이름도 함께 저장
-                });
+                setJobId(vocabularyResult.history_id);
                 setMode("Vocabulary");
             }
 

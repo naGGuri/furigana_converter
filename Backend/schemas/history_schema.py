@@ -1,23 +1,26 @@
-from pydantic import BaseModel
-from typing import List, Any
+from pydantic import BaseModel, field_validator
+from typing import List, Any, Optional
 from datetime import datetime
 
 
 class ConversionHistoryBase(BaseModel):
     conversion_type: str
     file_names: List[str]
-    # 결과 데이터는 리스트[문자열] 또는 리스트[리스트[객체]]가 될 수 있어 Any 사용
-    result_data: Any
 
 
 class ConversionHistoryCreate(ConversionHistoryBase):
-    pass
+    result_data: Any
 
 
 class ConversionHistory(ConversionHistoryBase):
     id: int
     user_id: int
     created_at: datetime
+    furigana_result: Optional[List[str]] = None
+    voca_result: Optional[List[Any]] = None
+
+    
 
     class Config:
         from_attributes = True
+
